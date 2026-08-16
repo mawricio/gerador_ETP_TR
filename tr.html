@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Script TR — DTI/CNJ 2026</title>
+<style>
+:root{
+  --navy:#0B1E3D;--navy2:#132952;--navy3:#1e3a6e;
+  --teal:#0A5C6E;--teal2:#0d7a92;
+  --bg:#F4F6FA;--card:#FFFFFF;--card2:#F8F9FC;
+  --border:#D8DDE8;--border2:#C2C9D8;
+  --text:#1A2340;--text2:#3D4F72;--text3:#6B7A99;
+  --obr:#C0392B;--obr-bg:#FDECEA;
+  --opt:#185FA5;--opt-bg:#E8F1FB;
+  --warn:#8A5C0A;--warn-bg:#FEF5E4;
+  --ok:#1A6B3C;--ok-bg:#E6F5EE;
+  --radius:6px;--shadow:0 1px 3px rgba(11,30,61,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+.header{background:var(--teal);color:#fff;padding:0 24px;display:flex;align-items:center;gap:14px;height:52px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.header-seal{width:34px;height:34px;border-radius:50%;background:#ffffff22;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;border:1.5px solid #ffffff55;flex-shrink:0}
+.header-title{flex:1}
+.header-title h1{font-size:14px;font-weight:600;letter-spacing:.01em}
+.header-title p{font-size:10px;opacity:.7;margin-top:1px}
+.header-badge{font-size:10px;background:rgba(255,255,255,.15);color:#fff;border:0.5px solid rgba(255,255,255,.4);padding:2px 9px;border-radius:10px}
+.header-home{font-size:11px;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.32);padding:4px 9px;border-radius:5px}
+.header-home:hover{background:rgba(255,255,255,.1)}
+.container{display:flex;height:calc(100vh - 52px)}
+.sidebar{width:200px;min-width:200px;background:var(--navy2);display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.08)}
+.nav-section{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);padding:14px 14px 5px}
+.nav-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;border:none;background:none;color:rgba(255,255,255,.6);font-size:12px;font-weight:500;width:100%;text-align:left;border-left:3px solid transparent;transition:all .15s}
+.nav-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-btn.active{background:rgba(10,92,110,.3);color:#5dd4e8;border-left-color:#5dd4e8}
+.nb{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.nb-obr{background:var(--obr-bg);color:var(--obr)}
+.nb-opt{background:var(--opt-bg);color:var(--opt)}
+.nb-teal{background:rgba(10,92,110,.4);color:#5dd4e8}
+.sidebar-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.08)}
+.ver{font-size:10px;color:rgba(255,255,255,.3);text-align:center}
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.panel{display:none;flex:1;overflow-y:auto;padding:20px 24px}
+.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.card-title{font-size:12px;font-weight:600;color:var(--navy);flex:1}
+.card-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g1{display:grid;grid-template-columns:1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:3px}
+label{font-size:11px;font-weight:500;color:var(--text2)}
+input[type=text],select,textarea{font-size:12px;font-family:inherit;color:var(--text);background:#fff;border:1px solid var(--border2);border-radius:var(--radius);padding:6px 9px;transition:border .15s;width:100%}
+textarea{resize:vertical;min-height:52px;line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 2px rgba(10,92,110,.12)}
+.hint{font-size:10px;color:var(--text3);margin-top:2px}
+.alert{font-size:11px;padding:7px 10px;border-radius:var(--radius);margin-top:6px;display:none}
+.alert-warn{background:var(--warn-bg);color:var(--warn);border:1px solid #f0c97a;display:block}
+.alert-ok{background:var(--ok-bg);color:var(--ok);border:1px solid #7ecfa3;display:block}
+.sl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:16px 0 7px;display:flex;align-items:center;gap:6px}
+.sl:first-child{margin-top:0}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+.badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap}
+.b-obr{background:var(--obr-bg);color:var(--obr)}
+.b-opt{background:var(--opt-bg);color:var(--opt)}
+.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-ok{background:var(--ok-bg);color:var(--ok)}
+.b-teal{background:rgba(10,92,110,.12);color:var(--teal)}
+.acc{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden}
+.acc-hdr{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--card2);cursor:pointer;user-select:none}
+.acc-hdr:hover{background:var(--card)}
+.acc-hdr input[type=checkbox]{cursor:pointer;flex-shrink:0}
+.acc-title{flex:1;font-size:12px;font-weight:500;color:var(--text)}
+.acc-body{padding:10px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--text2);line-height:1.65;display:none;white-space:pre-wrap}
+.acc-body.open{display:block}
+.acc-ref{font-size:10px;color:var(--text3);margin-top:5px;border-top:1px dashed var(--border);padding-top:5px}
+.chevron{font-size:11px;color:var(--text3);transition:transform .2s;margin-left:auto;flex-shrink:0}
+.chevron.open{transform:rotate(180deg)}
+.annex{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:7px}
+.annex-icon{width:30px;height:30px;border-radius:50%;background:var(--opt-bg);color:var(--opt);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px}
+.annex-body{flex:1}
+.annex-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.annex-desc{font-size:11px;color:var(--text2);line-height:1.5}
+.annex-ref{font-size:10px;color:var(--text3);margin-top:3px}
+.check-item{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card2);cursor:pointer;margin-bottom:5px;transition:all .15s}
+.check-item:hover{border-color:var(--border2)}
+.check-item.checked{background:var(--ok-bg);border-color:#7ecfa3}
+.ci-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.ci-r{background:var(--obr)}
+.ci-a{background:#e0b04d}
+.ci-g{background:var(--ok)}
+.ci-body{flex:1}
+.ci-lbl{font-size:12px;color:var(--text);line-height:1.45}
+.check-item.checked .ci-lbl{color:var(--ok)}
+.ci-ref{font-size:10px;color:var(--text3);margin-top:2px}
+.script-area{font-family:'Courier New',monospace;font-size:11px;line-height:1.8;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;white-space:pre-wrap;word-break:break-word;min-height:200px;color:var(--text);max-height:520px;overflow-y:auto}
+.script-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.stat-pill{font-size:11px;color:var(--text3);background:var(--card2);border:1px solid var(--border);padding:3px 10px;border-radius:10px}
+.btn{padding:7px 16px;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:#fff;color:var(--text2);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--card2);color:var(--text)}
+.btn-primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-primary:hover{background:var(--navy2)}
+.btn-teal{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn-teal:hover{background:var(--teal2)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.copy-fb{font-size:11px;color:var(--ok);display:none;margin-left:8px}
+.ctr{font-size:11px;color:var(--text3);margin-top:6px}
+.info-box{border-left:3px solid var(--teal);padding:8px 12px;background:#E4F3F8;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:10px;font-size:11px;color:var(--teal);line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-seal">CNJ</div>
+  <div class="header-title">
+    <h1>Gerador de Script — TR</h1>
+    <p>Termo de Referência · DTI/CNJ · Modelo 2026 · Lei 14.133/2021</p>
+  </div>
+  <a class="header-home" href="index.html">Início</a>
+  <div class="header-badge">v2.0 · Modelo Real CNJ 2026</div>
+</div>
+
+<div class="container">
+  <nav class="sidebar" aria-label="Navegação das seções">
+    <div class="nav-section">Configuração</div>
+    <button class="nav-btn active" onclick="goTab('params')"><div class="nb nb-teal">⚙</div> Parâmetros</button>
+    <div class="nav-section">Estrutura TR</div>
+    <button class="nav-btn" onclick="goTab('blocos')"><div class="nb nb-opt">20</div> Seções do TR</button>
+    <button class="nav-btn" onclick="goTab('checklist')"><div class="nb nb-obr">✓</div> Checklist TR</button>
+    <button class="nav-btn" onclick="goTab('anexos')"><div class="nb nb-teal">📎</div> Anexos Obrigatórios</button>
+    <div class="nav-section">Saída</div>
+    <button class="nav-btn" onclick="goTab('script');regen()"><div class="nb nb-teal">▶</div> Script Gerado</button>
+    <div class="sidebar-footer"><div class="ver">TR · CNJ 2026 · v2.0</div></div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ==================== PARÂMETROS ==================== -->
+    <div class="panel active" id="panel-params">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Identificação da contratação</div>
+            <div class="card-sub">O TR deve ser derivado do ETP aprovado — referencie o número do processo SEI do ETP</div>
+          </div>
+        </div>
+        <div class="info-box">ℹ O TR é o instrumento que vai ao edital. Deve referenciar expressamente o ETP aprovado. Sem ETP aprovado, o TR não pode ser elaborado (art. 40, §1º, Lei 14.133/2021).</div>
+        <div class="sl">Objeto e processo</div>
+        <div class="g2">
+          <div class="field"><label>Objeto da contratação</label><input type="text" id="objeto" placeholder="ex.: serviços de consulta de dados CPF/CNPJ com blockchain" oninput="regen()"></div>
+          <div class="field"><label>Processo SEI (TR)</label><input type="text" id="sei" placeholder="ex.: SEI 03379/2026-CNJ" oninput="regen()"></div>
+        </div>
+        <div class="g2" style="margin-top:10px">
+          <div class="field"><label>Processo SEI do ETP aprovado</label><input type="text" id="sei_etp" placeholder="ex.: SEI 03379/2026-CNJ (ETP aprovado pela SAD em DD/MM/AAAA)" oninput="regen()"></div>
+          <div class="field"><label>Unidade demandante</label><input type="text" id="unidade" value="DTI/CNJ" oninput="regen()"></div>
+        </div>
+        <div class="g3" style="margin-top:10px">
+          <div class="field">
+            <label>Natureza do serviço</label>
+            <select id="natureza" onchange="regen()">
+              <option value="stic">Solução de TIC (Res. CNJ 468/2022)</option>
+              <option value="continuado">Serviço continuado (art. 106)</option>
+              <option value="comum">Bem ou serviço comum</option>
+              <option value="consultoria">Consultoria especializada</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Modalidade de licitação</label>
+            <select id="modalidade" onchange="regen()">
+              <option value="pregao">Pregão eletrônico — art. 6º, XLI</option>
+              <option value="srp">Registro de Preços — SRP (art. 82)</option>
+              <option value="dispensa">Dispensa — art. 75</option>
+              <option value="inexigibilidade">Inexigibilidade — art. 74</option>
+              <option value="concorrencia">Concorrência — art. 6º, XXXVIII</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Critério de julgamento</label>
+            <select id="criterio" onchange="regen()">
+              <option value="menor_preco">Menor preço (art. 33, I)</option>
+              <option value="maior_desconto">Maior desconto (art. 33, II)</option>
+              <option value="melhor_tecnica">Melhor técnica e preço (art. 33, IV)</option>
+              <option value="tecnica_preco">Técnica e preço (art. 36, V)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Vigência e prorrogação</div></div>
+        <div class="g3">
+          <div class="field">
+            <label>Vigência inicial</label>
+            <select id="vig" onchange="vigAlert()">
+              <option value="12">12 meses</option>
+              <option value="24">24 meses</option>
+              <option value="36" selected>36 meses</option>
+              <option value="48">48 meses</option>
+              <option value="60">60 meses</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Modalidade de vigência</label>
+            <select id="vig_tipo" onchange="regen()">
+              <option value="contrato">Contrato com prazo fixo</option>
+              <option value="srp_ata">Ata de Registro de Preços (SRP)</option>
+              <option value="prorrogavel">Contrato prorrogável (art. 107, até 10 anos)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Índice de reajuste contratual</label>
+            <select id="reajuste" onchange="regen()">
+              <option value="icti">ICTI (Tecnologia da Informação)</option>
+              <option value="ipca">IPCA</option>
+              <option value="ambos">ICTI ou IPCA (definir na cláusula)</option>
+            </select>
+          </div>
+        </div>
+        <div class="alert alert-warn" id="vig-alert" style="display:none">⚠ Vigência &gt;12 meses exige justificativa expressa no TR, remissão ao ETP e fundamento no Acórdão 490/2012-TCU-Plenário.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Métricas, valor e orçamento</div></div>
+        <div class="g3">
+          <div class="field">
+            <label>Unidade de medida</label>
+            <select id="umed" onchange="regen()">
+              <option value="USIN">USIN (serviços integrados de nuvem)</option>
+              <option value="UST">UST (unidade de serviço técnico)</option>
+              <option value="USN">USN (unidade de serviço de nuvem)</option>
+              <option value="hora">Hora técnica</option>
+              <option value="pf">Ponto de função</option>
+              <option value="item">Item/unidade física</option>
+              <option value="outro">Outra (definir no TR)</option>
+            </select>
+          </div>
+          <div class="field"><label>Valor estimado total (R$)</label><input type="text" id="valor" placeholder="ex.: 200.872,80" oninput="regen()"></div>
+          <div class="field"><label>CATMAT/CATSER do objeto</label><input type="text" id="catmat" placeholder="ex.: CATSER 24112" oninput="regen()"></div>
+        </div>
+        <div class="g2" style="margin-top:10px">
+          <div class="field"><label>Programa de trabalho</label><input type="text" id="prog" placeholder="ex.: 02.032.0033.21BH.0001" oninput="regen()"></div>
+          <div class="field"><label>Natureza da despesa</label><input type="text" id="nd" placeholder="ex.: 3.3.90.40.00" oninput="regen()"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Equipe de gestão e fiscalização</div></div>
+        <div class="g2">
+          <div class="field"><label>Gestor do contrato</label><input type="text" id="gestor" placeholder="Nome — Matrícula — e-mail" oninput="regen()"></div>
+          <div class="field"><label>Fiscal técnico</label><input type="text" id="fisc_tec" placeholder="Nome — Matrícula — e-mail" oninput="regen()"></div>
+        </div>
+        <div class="g2" style="margin-top:10px">
+          <div class="field"><label>Fiscal administrativo</label><input type="text" id="fisc_adm" placeholder="Nome — Matrícula — e-mail" oninput="regen()"></div>
+          <div class="field"><label>Assessoria jurídica</label><input type="text" id="juridico" placeholder="ex.: ASTEC/CNJ" oninput="regen()"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Configurações normativas</div></div>
+        <div class="g2">
+          <div class="field">
+            <label>Norma primária CNJ</label>
+            <select id="norma" onchange="regen()">
+              <option value="res468">Res. CNJ 468/2022 + Guia STIC</option>
+              <option value="port468">Portaria CNJ 468/2025</option>
+              <option value="ambas">Ambas</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Incluir checklist Acórdão 157/2024-TCU (nuvem)?</label>
+            <select id="ac157" onchange="regen()">
+              <option value="sim">Sim — objeto de nuvem</option>
+              <option value="nao">Não — outro objeto</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== BLOCOS TR ==================== -->
+    <div class="panel" id="panel-blocos">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Seções do TR — Modelo Bens e Serviços Comuns CNJ 2026</div>
+            <div class="card-sub">Estrutura real do Modelo TR 2026. Itens obrigatórios seguem art. 40 da Lei 14.133/2021.</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <span class="badge b-obr">★ obrig.</span>
+            <span class="badge b-opt">○ opc.</span>
+          </div>
+        </div>
+        <div id="blocos-list"></div>
+        <div class="ctr" id="bctr"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-sm" onclick="tall(true)">Selecionar todos</button>
+          <button class="btn btn-sm" onclick="tall(false)">Limpar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CHECKLIST ==================== -->
+    <div class="panel" id="panel-checklist">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Checklist do TR — TCU/CNJ</div>
+            <div class="card-sub">Marque os itens já verificados no rascunho do TR. Pendentes geram alertas no script.</div>
+          </div>
+        </div>
+        <div id="checklist-list"></div>
+      </div>
+    </div>
+
+    <!-- ==================== ANEXOS ==================== -->
+    <div class="panel" id="panel-anexos">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Anexos Obrigatórios do TR — CNJ</div>
+            <div class="card-sub">O modelo TR CNJ 2026 prevê três anexos fixos que devem acompanhar o TR no edital</div>
+          </div>
+          <span class="badge b-obr">todos obrigatórios</span>
+        </div>
+        <div class="annex">
+          <div class="annex-icon">📋</div>
+          <div class="annex-body">
+            <div class="annex-title">Anexo I — Código de Conduta para Fornecedores do CNJ</div>
+            <div class="annex-desc">Documento que estabelece os padrões éticos e de conduta esperados dos fornecedores que contratam com o CNJ. A assinatura do Código de Conduta é condição da contratação.</div>
+            <div class="annex-ref">Base legal: Portaria CNJ 18/2020 | Obrigação da contratada declarada nas obrigações do TR</div>
+          </div>
+        </div>
+        <div class="annex">
+          <div class="annex-icon">🔒</div>
+          <div class="annex-body">
+            <div class="annex-title">Anexo XX — Termo de Responsabilidade e Confidencialidade</div>
+            <div class="annex-desc">Declaração dos profissionais da contratada que terão acesso a informações sigilosas ou dados pessoais do CNJ. Deve ser assinado individualmente por cada profissional designado antes do início dos trabalhos.</div>
+            <div class="annex-ref">Base legal: Portaria CNJ 159/2021 | Res. CNJ 396/2021 (ENSEC-PJ) | Lei 13.709/2018 (LGPD)</div>
+          </div>
+        </div>
+        <div class="annex">
+          <div class="annex-icon">📝</div>
+          <div class="annex-body">
+            <div class="annex-title">Anexo XX — Modelo de Ordem de Serviço / Ordem de Fornecimento (OS/OF)</div>
+            <div class="annex-desc">Template padronizado da OS/OF que a unidade gestora emitirá para demandar serviços ou entregas. Deve conter no mínimo: número sequencial, descrição do serviço/item demandado, volume estimado, prazo de atendimento, responsável pela emissão e responsável pelo aceite.</div>
+            <div class="annex-ref">Base legal: Art. 40, §1º, Lei 14.133/2021 | IN SGD/MGI 94/2022, art. 32 | Acórdão 157/2024-TCU, R1</div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          ℹ O SIGEO-JT (Sistema de Gestão de Orçamento) deve ser referenciado na seção de pagamento do TR como portal obrigatório para registro e ateste de notas fiscais do CNJ.
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCRIPT ==================== -->
+    <div class="panel" id="panel-script">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Script Gerado — pronto para copiar</div>
+            <div class="card-sub">Cole como primeira mensagem. Em seguida: "Aguarde instruções." → envie o ETP aprovado → envie o Modelo TR CNJ 2026 → elabore seção a seção.</div>
+          </div>
+        </div>
+        <div class="script-toolbar">
+          <button class="btn btn-teal" onclick="copyScript()">⧉ Copiar script completo</button>
+          <button class="btn btn-primary" onclick="DocxExporter.exportGenerator('TR')">↓ Baixar DOCX</button>
+          <button class="btn" onclick="regen()">↺ Atualizar</button>
+          <span class="copy-fb" id="fb">✓ Copiado!</span>
+          <span class="copy-fb" id="docx-fb">✓ DOCX gerado!</span>
+          <span class="stat-pill" id="stat-secoes"></span>
+          <span class="stat-pill" id="stat-checks"></span>
+        </div>
+        <div class="script-area" id="scriptBox">Preencha os parâmetros e clique em "Atualizar".</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="assets/docx-export.js"></script>
+<script>
+// ============================================================
+// DADOS — BLOCOS DO TR
+// ============================================================
+const BLOCOS=[
+  {id:'t1',n:'1',lbl:'Condições Gerais da Contratação',obrig:true,
+   ref:'Art. 6º, XXIII; art. 40, Lei 14.133/2021',
+   desc:`1.1 DEFINIÇÃO DO OBJETO: tabela com colunas ITEM | DESCRIÇÃO | UNIDADE | QUANTIDADE | CATMAT ou CATSER. ATENÇÃO: o código CATMAT/CATSER é obrigatório e determina se o objeto é bem/serviço comum ou especial no PNCP.
+
+1.2 PARCELAMENTO DOS ITENS: item único, por itens ou por grupos. Justificar com base no art. 47 da Lei 14.133/2021.
+
+1.3 NATUREZA DO OBJETO: classificação (comum, continuado, solução de TI).
+
+1.4 VIGÊNCIA E PRORROGAÇÃO: usar uma das três redações alternativas do modelo CNJ:
+(a) Contrato com prazo fixo
+(b) Nota de empenho (aquisição pontual)
+(c) Contrato prorrogável — art. 107, Lei 14.133/2021 (até 10 anos para serviços contínuos)`},
+  {id:'t2',n:'2',lbl:'Fundamentação e Descrição da Necessidade',obrig:true,
+   ref:'Art. 40, §1º, I, Lei 14.133/2021',
+   desc:`2.1 REFERÊNCIA AO ETP: citar expressamente o ETP aprovado — número do processo SEI, data de aprovação pela SAD e conclusão de viabilidade. SEM ETP APROVADO, O TR NÃO PODE SER PUBLICADO.
+
+2.2 PCA: indicar o Plano de Contratações Anual no qual esta contratação está prevista.`},
+  {id:'t3',n:'3',lbl:'Descrição da Solução',obrig:true,
+   ref:'Art. 18; art. 40, §1º, Lei 14.133/2021',
+   desc:`Solução descrita com precisão técnica suficiente para permitir avaliação de conformidade pelos licitantes e fiscalização pela Administração: arquitetura, componentes, integrações, ambientes (produção, homologação, desenvolvimento), protocolos, padrões técnicos.
+
+VEDAÇÃO: não referenciar marcas, modelos ou fabricantes específicos — art. 41, §1º, Lei 14.133/2021. Exceção: quando tecnicamente justificado como padrão compatível.`},
+  {id:'t4',n:'4',lbl:'Requisitos da Contratação',obrig:true,
+   ref:'Art. 40, §1º, Lei 14.133/2021',
+   desc:`4.1 REQUISITOS LEGAIS: normas técnicas ABNT, regulamentações setoriais, Res. CNJ 400/2021, Portaria CNJ 18/2020 (Código de Conduta).
+
+4.2 REQUISITOS DE SUSTENTABILIDADE: Res. CNJ 400/2021, PLS-CNJ 2021-2026, Lei 14.133/2021, arts. 11 e 68.
+
+4.3 OUTROS REQUISITOS: técnicos, de desempenho, de compatibilidade, de segurança (Res. CNJ 396/2021 — ENSEC-PJ), de LGPD.
+
+4.4 INDICAÇÃO DE MARCAS: apenas se tecnicamente justificada.
+
+4.5 VEDAÇÃO DE UTILIZAÇÃO DE MARCA/PRODUTO: se aplicável.
+
+4.6 SUBCONTRATAÇÃO: autorizada ou vedada? Se autorizada: limites, responsabilidades, ciência prévia do CNJ.
+
+4.7 GARANTIA DA CONTRATAÇÃO: exigir ou não? Se exigida: percentual (art. 96, Lei 14.133/2021) e modalidade.
+
+4.8 RESERVA DE COTAS PARA ME/EPP: art. 48, LC 123/2006.
+
+4.9 PARTICIPAÇÃO EM CONSÓRCIOS: autorizada ou vedada (art. 15, Lei 14.133/2021).`},
+  {id:'t5',n:'5',lbl:'Modelo de Execução do Objeto',obrig:true,
+   ref:'Art. 40, §1º, II, Lei 14.133/2021 | IN SGD/MGI 94/2022, art. 32',
+   desc:`5.1 LOCAL E HORÁRIO DE EXECUÇÃO: endereço, horário de atendimento, modalidade (presencial/remoto/híbrido).
+
+5.2 DINÂMICA E ORDEM DE EXECUÇÃO: processo de acionamento do serviço, fluxo de demanda, prazo de resposta e de resolução.
+
+5.3 ORDEM DE SERVIÇO (OS): OBRIGATÓRIA como instrumento formal de demanda. A OS deve conter no mínimo: número sequencial, descrição, volume estimado, prazo, responsável pela emissão, responsável pelo aceite. Ver Anexo XX (Modelo de OS).
+
+5.4 PRAZO OU CRONOGRAMA DE EXECUÇÃO: marcos de entrega, prazos por tipo de demanda.
+
+5.5 GARANTIA, MANUTENÇÃO E ASSISTÊNCIA TÉCNICA: SLA de cada indicador, janelas de manutenção, procedimentos de acionamento.`},
+  {id:'t6',n:'6',lbl:'Modelo de Gestão da Contratação',obrig:true,
+   ref:'Art. 117, Lei 14.133/2021 | Art. 40, §1º, III',
+   desc:`6.1 FISCALIZAÇÃO E ACOMPANHAMENTO:
+- Gestor do contrato: atribuições gerais de coordenação
+- Fiscal técnico: acompanhamento técnico, OS, análise de SLA, FinOps
+- Fiscal administrativo: aspectos financeiros, pagamentos, penalidades
+
+Cada fiscal com atribuições expressamente descritas. Alçadas de aprovação proporcionais à materialidade. Reuniões periódicas de acompanhamento previstas. Relatórios de gestão com periodicidade definida.
+
+NOTA: para objetos de nuvem, incluir rastreabilidade por tags nos recursos consumidos (Acórdão 157/2024-TCU, R1).`},
+  {id:'t7',n:'7',lbl:'Forma e Critérios de Seleção do Fornecedor',obrig:true,
+   ref:'Art. 67, Lei 14.133/2021',
+   desc:`7.1 MODALIDADE E CRITÉRIO DE JULGAMENTO: conforme definido nos parâmetros.
+
+7.2 CRITÉRIOS DE ACEITAÇÃO DA PROPOSTA: requisitos mínimos de conformidade técnica da proposta.
+
+7.3 CRITÉRIOS DE HABILITAÇÃO:
+a) Habilitação jurídica — art. 66, Lei 14.133/2021
+b) Habilitação fiscal e trabalhista — art. 68, Lei 14.133/2021
+c) Qualificação econômico-financeira — art. 69, Lei 14.133/2021
+d) Qualificação técnica — art. 67, Lei 14.133/2021
+   ATENÇÃO: exigências de qualificação técnica devem ser proporcionais à complexidade do objeto. Exigências restritivas da competição configuram irregularidade — TCU, jurisprudência consolidada.
+
+7.4 EXIGÊNCIA DE AMOSTRA: se necessária, definir prazo, critérios de aprovação/reprovação.
+
+7.5 EXIGÊNCIA DE VISTORIA: se necessária, justificar e definir procedimento.`},
+  {id:'t8',n:'8',lbl:'Critérios de Medição e Pagamento',obrig:true,
+   ref:'Art. 140; art. 92, Lei 14.133/2021',
+   desc:`8.1 RECEBIMENTO DO OBJETO:
+a) Recebimento provisório: responsável, prazo (art. 140, I), documentação exigida
+b) Recebimento definitivo: responsável, prazo (art. 140, II), critérios de aceite
+c) Não conformidades: prazo de regularização, rejeição, refazimento
+
+8.2 FORMA DE PAGAMENTO:
+- Prazo: até 30 dias do recebimento definitivo (art. 92, §5º, Lei 14.133/2021)
+- Nota fiscal deve ser registrada no SIGEO-JT (sistema CNJ) antes do atesto
+- Vedação de antecipação de pagamento sem contrapartida (art. 92, III, Lei 14.133/2021)
+- Índice de atualização monetária: IPCA ou ICTI (conforme cláusula de reajuste)`},
+  {id:'t9',n:'9',lbl:'Indicadores de Nível de Serviço (SLA)',obrig:false,
+   ref:'Art. 40, §1º, II, Lei 14.133/2021 | Res. CNJ 468/2022',
+   desc:`Para cada indicador de SLA:
+- Nome e descrição do indicador
+- Fórmula de cálculo objetiva e verificável
+- Meta mínima aceitável (%)
+- Período de apuração (mensal/trimestral)
+- Instrumento de medição e fonte de dados
+- Glosa automática por descumprimento: fórmula e percentual
+- Período de carência (meses iniciais sem aplicação de glosa, se houver)
+- Teto máximo de desconto acumulado
+
+ATENÇÃO: SLAs genéricos sem fórmula objetiva são nulos para fins de glosa. Cada meta deve ser aferível sem margem de subjetividade.`},
+  {id:'t10',n:'10',lbl:'Obrigações do Contratante (CNJ)',obrig:true,
+   ref:'Art. 40, §1º, V, Lei 14.133/2021',
+   desc:`Obrigações do CNJ enquanto contratante:
+- Designar formalmente o gestor e os fiscais antes do início do contrato
+- Fornecer as informações necessárias para a execução do objeto
+- Emitir ordens de serviço e/ou de fornecimento tempestivamente
+- Aprovar planos de trabalho e documentação técnica nos prazos acordados
+- Efetuar pagamentos nos prazos previstos
+- Comunicar irregularidades ou inconformidades imediatamente
+- Dar feedbacks de desempenho periódicos`},
+  {id:'t11',n:'11',lbl:'Obrigações da Contratada',obrig:true,
+   ref:'Art. 40, §1º, V, Lei 14.133/2021',
+   desc:`Obrigações técnicas, operacionais, de segurança e normativas:
+- Manter equipe técnica qualificada e disponível nos prazos do SLA
+- Assinar o Código de Conduta de Fornecedores (Portaria CNJ 18/2020)
+- Assinar o Termo de Responsabilidade e Confidencialidade (Portaria CNJ 159/2021)
+- Observar a Res. CNJ 400/2021 (sustentabilidade) e o PLS-CNJ 2021-2026
+- Manter conformidade com a LGPD (Lei 13.709/2018) — tratamento de dados pessoais
+- Comunicar incidentes de segurança no prazo máximo de 2h após detecção (Res. CNJ 396/2021)
+- Manter sigilo absoluto sobre informações do CNJ
+- Não subcontratar sem ciência prévia e anuência do CNJ
+- Registrar notas fiscais no SIGEO-JT antes do ateste`},
+  {id:'t12',n:'12',lbl:'Infrações e Sanções Administrativas',obrig:true,
+   ref:'Arts. 155, 156 e 162, Lei 14.133/2021 | IN DG-CNJ 94/2023',
+   desc:`Tabela de infrações e sanções conforme art. 156, Lei 14.133/2021 e IN DG-CNJ 94/2023 (norma específica do CNJ para aplicação de sanções):
+
+SANÇÕES APLICÁVEIS (art. 156):
+I.   Advertência (infrações leves — primeira ocorrência)
+II.  Multa (percentuais conforme tabela de infrações)
+III. Impedimento de licitar e contratar (prazo máximo 3 anos)
+IV.  Declaração de inidoneidade (prazo mínimo 3 anos)
+
+ATENÇÃO: referenciar a IN DG-CNJ 94/2023 expressamente — é a norma específica do CNJ. Não usar apenas art. 156 da Lei 14.133/2021.
+
+Cada infração deve ter: descrição, sanção aplicável, percentual de multa, possibilidade de cumulatividade, prazo de defesa (art. 157).`},
+  {id:'t13',n:'13',lbl:'Valor Estimado da Contratação',obrig:true,
+   ref:'Art. 23; art. 40, §1º, IV, Lei 14.133/2021',
+   desc:`Tabela: ITEM | DESCRIÇÃO | QTD | UNIDADE | VALOR UNITÁRIO | VALOR TOTAL.
+
+Remissão à pesquisa de preços realizada no ETP (processo SEI do ETP). O valor do TR deve ser consistente com o valor aprovado no ETP.
+
+O valor estimado pode ser sigiloso até a abertura das propostas — art. 24, §§1º e 2º, Lei 14.133/2021. Se sigiloso, indicar apenas que o valor está disponível nos autos.`},
+  {id:'t14',n:'14',lbl:'Reajuste e Repactuação',obrig:false,
+   ref:'Art. 92, §§1º a 3º, Lei 14.133/2021',
+   desc:`Periodicidade mínima de 12 meses entre reajustes (art. 92, §1º).
+
+ÍNDICE: ICTI (Índice de Custo da Tecnologia da Informação / IPEA) para objetos de TI, ou IPCA. Definir expressamente qual será utilizado. Vedação de dupla incidência de índice.
+
+Se repactuação (serviços com mão de obra preponderante): planilha de custos, convenção coletiva, período de 12 meses da data de apresentação da proposta.
+
+ATENÇÃO: o índice do reajuste contratual pode ser ICTI ou IPCA. O índice da pesquisa de preços (ETP) usa IPCA (Manual SECOM/CNJ). São contextos distintos.`},
+  {id:'t15',n:'15',lbl:'Adequação Orçamentária',obrig:true,
+   ref:'Art. 18, §1º, IV; art. 106, §3º, Lei 14.133/2021 | Art. 16, LC 101/2000',
+   desc:`Indicação do programa de trabalho, natureza da despesa e saldo orçamentário disponível.
+
+Declaração de compatibilidade com o PPA, LDO e LOA vigentes (art. 16, LC 101/2000).
+
+Para serviços continuados: impacto nos exercícios subsequentes ao da celebração (art. 106, §3º).`},
+  {id:'t16',n:'16',lbl:'Publicidade',obrig:true,
+   ref:'Art. 54, Lei 14.133/2021 | PNCP',
+   desc:`Declaração de que o instrumento será publicado no Portal Nacional de Contratações Públicas (PNCP), conforme art. 54, Lei 14.133/2021.`},
+  {id:'t17',n:'17',lbl:'Segurança da Informação e LGPD',obrig:false,
+   ref:'Lei 13.709/2018 | Res. CNJ 396/2021 (ENSEC-PJ)',
+   desc:`Se o objeto envolve tratamento de dados pessoais ou acesso a sistemas/informações do CNJ:
+- Classificação dos dados tratados (público, interno, confidencial, restrito — ENSEC-PJ)
+- Localização dos dados: preferencialmente território nacional
+- Requisitos de criptografia e controle de acesso
+- Prazo máximo de notificação de incidentes: 2 horas após detecção
+- Aditivo de processamento de dados pessoais como subcontratante (DPA)
+- Indicação de Encarregado de Dados (DPO) da contratada
+- Procedimentos de eliminação de dados ao término do contrato`},
+  {id:'t18',n:'18',lbl:'Estratégia de Saída e Portabilidade',obrig:false,
+   ref:'Acórdão 157/2024-TCU, R2 | Res. CNJ 468/2022',
+   desc:`Para objetos de TI com risco de lock-in:
+- Obrigação de portabilidade de dados ao término ou rescisão do contrato
+- Formatos abertos e interoperáveis (proibição de formatos proprietários exclusivos)
+- Prazo mínimo de transição: 12 meses (ou conforme ETP)
+- Custo de saída: nenhum custo adicional ao CNJ pela portabilidade
+- Plano de migração a ser apresentado com antecedência mínima de 90 dias do término
+- Manutenção do acesso aos dados durante o período de transição`},
+  {id:'t19',n:'19',lbl:'Continuidade de Negócio (RTO/RPO)',obrig:false,
+   ref:'Res. CNJ 396/2021 | IN SGD/MGI 94/2022',
+   desc:`Para sistemas críticos:
+- RTO (Recovery Time Objective): tempo máximo de interrupção aceitável
+- RPO (Recovery Point Objective): ponto máximo de perda de dados aceitável
+- Plano de recuperação de desastres (DR) — apresentar no prazo X dias após assinatura
+- Testes periódicos de DR com participação do CNJ (frequência mínima: anual)
+- Redundância geográfica (ativa-ativa ou ativa-passiva)`},
+  {id:'t20',n:'20',lbl:'Marketplace e Catálogo de Serviços',obrig:false,
+   ref:'Acórdão 157/2024-TCU, R2 e R3',
+   desc:`Para contratações de nuvem com catálogo ou marketplace:
+- Definição do tipo de catálogo: aberto, fechado ou híbrido (justificativa obrigatória)
+- Price list com preços máximos individualizados por provedor (Acórdão 157/2024, R2)
+- Vedação EXPRESSA a alteração unilateral de preços pela contratada (Acórdão 2.569/2018)
+- Análise de custo-benefício obrigatória antes de cada provisionamento de marketplace
+- Limite de valor por OS no marketplace: teto de dispensa (art. 75, Lei 14.133/2021) como referência
+- Mini-ETP antes de cada aquisição relevante via marketplace`},
+];
+
+const CHECKS=[
+  {id:'tc1',lbl:'Objeto definido com CATMAT/CATSER na tabela do item 1.1',ref:'PNCP | Art. 6º, XXIII, Lei 14.133/2021',sev:'r'},
+  {id:'tc2',lbl:'Referência expressa ao ETP aprovado com número do SEI e data',ref:'Art. 40, §1º, I, Lei 14.133/2021',sev:'r'},
+  {id:'tc3',lbl:'Vigência superior a 12 meses com justificativa no TR e remissão ao ETP',ref:'Acórdão 490/2012-TCU-Plenário',sev:'r'},
+  {id:'tc4',lbl:'Modalidade de vigência definida (prazo fixo / SRP / prorrogável art. 107)',ref:'Art. 107, Lei 14.133/2021',sev:'r'},
+  {id:'tc5',lbl:'OS definida como instrumento formal com elementos mínimos e Anexo de modelo',ref:'IN SGD/MGI 94/2022, art. 32 | Acórdão 157/2024-TCU, R1',sev:'r'},
+  {id:'tc6',lbl:'Gestor e fiscais (técnico e administrativo) com atribuições distintas',ref:'Art. 117, Lei 14.133/2021',sev:'r'},
+  {id:'tc7',lbl:'SLAs com fórmula objetiva, meta, período de apuração e glosa automática',ref:'Art. 40, §1º, II | Res. CNJ 468/2022',sev:'r'},
+  {id:'tc8',lbl:'Sanções referenciam a IN DG-CNJ 94/2023 além do art. 156',ref:'IN DG-CNJ 94/2023 | Arts. 155-156, Lei 14.133/2021',sev:'r'},
+  {id:'tc9',lbl:'Recebimento provisório e definitivo com prazos e critérios de aceite',ref:'Art. 140, Lei 14.133/2021',sev:'r'},
+  {id:'tc10',lbl:'Nota fiscal deve ser registrada no SIGEO-JT antes do ateste de pagamento',ref:'Procedimento CNJ — SIGEO-JT',sev:'a'},
+  {id:'tc11',lbl:'Vedação de antecipação de pagamento sem contrapartida expressa',ref:'Art. 92, III, Lei 14.133/2021',sev:'r'},
+  {id:'tc12',lbl:'Índice de reajuste definido (ICTI ou IPCA) com periodicidade mínima de 12 meses',ref:'Art. 92, §§1º-3º, Lei 14.133/2021',sev:'a'},
+  {id:'tc13',lbl:'Qualificação técnica proporcional à complexidade — sem restrição indevida',ref:'Art. 67, Lei 14.133/2021 | TCU, jurisprudência',sev:'a'},
+  {id:'tc14',lbl:'Anexo I: Código de Conduta de Fornecedores (Portaria CNJ 18/2020) incluído',ref:'Portaria CNJ 18/2020',sev:'r'},
+  {id:'tc15',lbl:'Anexo: Termo de Responsabilidade e Confidencialidade (Portaria CNJ 159/2021) incluído',ref:'Portaria CNJ 159/2021 | Res. CNJ 396/2021',sev:'r'},
+  {id:'tc16',lbl:'Anexo: Modelo de Ordem de Serviço/Fornecimento incluído',ref:'Art. 40, §1º, II | IN SGD/MGI 94/2022, art. 32',sev:'r'},
+  {id:'tc17',lbl:'Adequação orçamentária com compatibilidade PPA/LDO/LOA declarada',ref:'Art. 16, LC 101/2000 | Art. 106, §3º, Lei 14.133/2021',sev:'r'},
+  {id:'tc18',lbl:'Requisitos de LGPD: localização de dados, notificação de incidentes, DPO',ref:'Lei 13.709/2018 | Res. CNJ 396/2021',sev:'a'},
+  {id:'tc19',lbl:'Estratégia de saída com portabilidade, formato aberto e prazo de transição',ref:'Acórdão 157/2024-TCU, R2 | Res. CNJ 468/2022',sev:'a'},
+  {id:'tc20',lbl:'Vedação a referência a marcas sem justificativa técnica',ref:'Art. 41, §1º, Lei 14.133/2021',sev:'r'},
+];
+
+const CHECKS_NUVEM=[
+  {id:'tn1',lbl:'R2: Catálogo aberto/fechado/híbrido com justificativa formal',ref:'Acórdão 157/2024-TCU, R2',sev:'r'},
+  {id:'tn2',lbl:'R2: Price list com preços máximos individualizados por provedor',ref:'Acórdão 157/2024-TCU, R2',sev:'r'},
+  {id:'tn3',lbl:'R2: Vedação EXPRESSA a alteração unilateral de preços pela contratada',ref:'Art. 92, Lei 14.133/2021 | Acórdão 2.569/2018-TCU',sev:'r'},
+  {id:'tn4',lbl:'R3: Limite de valor por OS no marketplace com referência ao teto de dispensa',ref:'Art. 75, Lei 14.133/2021 | Acórdão 157/2024-TCU, R3',sev:'a'},
+  {id:'tn5',lbl:'R3: Mini-ETP obrigatório antes de aquisição relevante via marketplace',ref:'Acórdão 157/2024-TCU, R3',sev:'a'},
+  {id:'tn6',lbl:'R6: Unidade de medida (USIN/USN/UST) com metodologia de aferição descrita',ref:'Acórdão 1.508/2020-TCU | R6',sev:'r'},
+  {id:'tn7',lbl:'R6: Vedação a regra de precificação externa ao contrato endereçada',ref:'Acórdão 2.569/2018-TCU, item 9.1.1.1.1.1',sev:'r'},
+  {id:'tn8',lbl:'R1: Rastreabilidade por tags nos recursos de nuvem consumidos prevista',ref:'Acórdão 157/2024-TCU, R1',sev:'r'},
+];
+
+let bsel=new Set(BLOCOS.filter(b=>b.obrig).map(b=>b.id));
+let csel=new Set();
+
+function goTab(t){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll(`.nav-btn`).forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${t}'`))b.classList.add('active')});
+  const p=document.getElementById('panel-'+t);if(p)p.classList.add('active');
+}
+
+function renderBlocos(){
+  const el=document.getElementById('blocos-list');
+  el.innerHTML=BLOCOS.map(b=>`
+    <div class="acc">
+      <div class="acc-hdr">
+        <input type="checkbox" id="${b.id}" ${bsel.has(b.id)?'checked':''} onchange="tbloco('${b.id}',this.checked)">
+        <label for="${b.id}" class="acc-title" style="cursor:pointer">${b.n}. ${b.lbl}</label>
+        ${b.obrig?'<span class="badge b-obr">★ obrig.</span>':'<span class="badge b-opt">○ opc.</span>'}
+        <span class="chevron" onclick="toggleAcc(this.closest('.acc').querySelector('.acc-hdr'))">▼</span>
+      </div>
+      <div class="acc-body">
+${b.desc}
+<div class="acc-ref">${b.ref}</div>
+      </div>
+    </div>`).join('');
+  updbc();
+}
+function tbloco(id,v){v?bsel.add(id):bsel.delete(id);updbc()}
+function tall(v){BLOCOS.forEach(b=>v?bsel.add(b.id):bsel.delete(b.id));renderBlocos()}
+function updbc(){document.getElementById('bctr').textContent=`${bsel.size} de ${BLOCOS.length} seções selecionadas`}
+
+function renderChecklist(){
+  const ac157=document.getElementById('ac157')?.value==='sim';
+  const el=document.getElementById('checklist-list');
+  if(!el)return;
+  el.innerHTML='';
+  CHECKS.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='check-item'+(csel.has(c.id)?' checked':'');
+    div.onclick=()=>toggleCheck(c.id,div);
+    div.innerHTML=`<div class="ci-dot ci-${c.sev}"></div><input type="checkbox" ${csel.has(c.id)?'checked':''} onclick="event.stopPropagation();toggleCheck('${c.id}',this.closest('.check-item'))"><div class="ci-body"><div class="ci-lbl">${c.lbl}</div><div class="ci-ref">${c.ref}</div></div>`;
+    el.appendChild(div);
+  });
+  if(ac157){
+    const hdr=document.createElement('div');hdr.className='sl';hdr.textContent='Requisitos específicos de nuvem — Acórdão 157/2024-TCU';el.appendChild(hdr);
+    CHECKS_NUVEM.forEach(c=>{
+      const div=document.createElement('div');
+      div.className='check-item'+(csel.has(c.id)?' checked':'');
+      div.onclick=()=>toggleCheck(c.id,div);
+      div.innerHTML=`<div class="ci-dot ci-${c.sev}"></div><input type="checkbox" ${csel.has(c.id)?'checked':''} onclick="event.stopPropagation();toggleCheck('${c.id}',this.closest('.check-item'))"><div class="ci-body"><div class="ci-lbl">${c.lbl}</div><div class="ci-ref">${c.ref}</div></div>`;
+      el.appendChild(div);
+    });
+  }
+}
+function toggleCheck(id,el){csel.has(id)?csel.delete(id):csel.add(id);el.classList.toggle('checked',csel.has(id));el.querySelector('input[type=checkbox]').checked=csel.has(id)}
+
+function toggleAcc(hdr){const body=hdr.nextElementSibling;const chev=hdr.querySelector('.chevron');if(body){body.classList.toggle('open');if(chev)chev.classList.toggle('open')}}
+
+function vigAlert(){
+  const v=parseInt(document.getElementById('vig')?.value||'12');
+  const a=document.getElementById('vig-alert');
+  if(a)a.style.display=v>12?'block':'none';
+  regen();
+}
+
+function v(id){return(document.getElementById(id)||{}).value?.trim()||''}
+function normaLabel(){return{res468:'Resolução CNJ 468/2022 e Guia de Contratações de STIC',port468:'Portaria CNJ 468/2025',ambas:'Resolução CNJ 468/2022, Guia STIC e Portaria CNJ 468/2025'}[v('norma')]||''}
+function criterioLabel(){return{menor_preco:'Menor preço (art. 33, I)',maior_desconto:'Maior desconto (art. 33, II)',melhor_tecnica:'Melhor técnica e preço (art. 33, IV)',tecnica_preco:'Técnica e preço (art. 36, V)'}[v('criterio')]||v('criterio')}
+function modalLabel(){return{pregao:'Pregão eletrônico (art. 6º, XLI)',srp:'Registro de Preços — SRP (art. 82)',dispensa:'Dispensa de licitação (art. 75)',inexigibilidade:'Inexigibilidade (art. 74)',concorrencia:'Concorrência (art. 6º, XXXVIII)'}[v('modalidade')]||v('modalidade')}
+function reajLabel(){return{icti:'ICTI — Índice de Custo da Tecnologia da Informação (IPEA)',ipca:'IPCA — Índice de Preços ao Consumidor Amplo (IBGE)',ambos:'ICTI ou IPCA (definir na cláusula de reajuste)'}[v('reajuste')]||''}
+function vigTipoLabel(){return{contrato:'Contrato com prazo fixo',srp_ata:'Ata de Registro de Preços (SRP)',prorrogavel:'Contrato prorrogável — art. 107, Lei 14.133/2021 (até 10 anos para serviços contínuos)'}[v('vig_tipo')]||''}
+function natLabel(){return{stic:'Solução de Tecnologia da Informação e Comunicação (STIC)',continuado:'Serviço de natureza continuada — art. 106, Lei 14.133/2021',comum:'Bem ou serviço comum',consultoria:'Consultoria especializada'}[v('natureza')]||v('natureza')}
+
+function regen(){
+  const obj=v('objeto')||'OBJETO A DEFINIR';
+  const sei=v('sei')||'SEI Nº A DEFINIR';
+  const seiEtp=v('sei_etp')||'SEI DO ETP A INFORMAR';
+  const und=v('unidade')||'DTI/CNJ';
+  const vig=v('vig');const vigN=parseInt(vig);
+  const umed=v('umed');const valor=v('valor')||'A ESTIMAR';
+  const catmat=v('catmat')||'A DEFINIR';
+  const prog=v('prog')||'A DEFINIR';const nd=v('nd')||'A DEFINIR';
+  const gestor=v('gestor')||'A DESIGNAR';
+  const ftec=v('fisc_tec')||'A DESIGNAR';
+  const fadm=v('fisc_adm')||'A DESIGNAR';
+  const jur=v('juridico')||'ASTEC/CNJ';
+  const ac157=v('ac157')==='sim';
+  const blocosSel=BLOCOS.filter(b=>bsel.has(b.id));
+  const allChecks=ac157?[...CHECKS,...CHECKS_NUVEM]:CHECKS;
+  const pendentes=allChecks.filter(c=>!csel.has(c.id));
+  const criticos=pendentes.filter(c=>c.sev==='r');
+  const relevantes=pendentes.filter(c=>c.sev==='a');
+
+  let s=`# SCRIPT MESTRE — TR DTI/CNJ 2026
+# Baseado no Modelo TR Bens e Serviços Comuns 2026 (CNJ)
+# Tipo de artefato: TERMO DE REFERÊNCIA (instrumento convocatório — vai ao edital)
+# Unidade: ${und} | Objeto: ${obj.toUpperCase()}
+# Processo TR: ${sei} | Processo ETP (origem): ${seiEtp}
+${'─'.repeat(64)}
+
+## PAPEL E CONTEXTO
+
+Você é consultor sênior em licitações e contratos públicos de TI do Poder Judiciário, especializado na elaboração de Termos de Referência (TR) conforme o modelo oficial CNJ 2026. O TR é o instrumento convocatório — define objeto, obrigações, métricas, SLAs, sanções e condições contratuais. Vai ao edital e torna-se parte integrante do contrato.
+
+Domina:
+
+NORMAS PRIMÁRIAS:
+- Lei 14.133/2021 — Nova Lei de Licitações e Contratos
+  (arts. 6º, 15, 23, 24, 33, 40, 41, 47, 54, 66-70, 92, 96, 106, 107, 117, 140, 155-157, 162)
+- ${normaLabel()}
+- IN DG-CNJ 94/2023 (sanções administrativas no âmbito do CNJ)
+- Portaria CNJ 18/2020 (Código de Conduta de Fornecedores)
+- Portaria CNJ 159/2021 (Termo de Responsabilidade e Confidencialidade)
+- Portaria CNJ 290/2022 (delegação de competências — aprovação de Mapa de Preços pela SAD)
+- Res. CNJ 400/2021 (sustentabilidade no Poder Judiciário)
+- Res. CNJ 396/2021 — ENSEC-PJ (segurança da informação)
+- LC 123/2006 (ME/EPP — reserva de cotas)
+
+NORMAS SUBSIDIÁRIAS:
+- IN SGD/MGI 94/2022 (boa prática para STIC)
+- IN SEGES/ME 65/2021 (pesquisa de preços)`;
+
+  if(ac157) s+=`\n- Acórdão 157/2024-TCU-Plenário (riscos R1 a R6 — nuvem)
+- Acórdão 2.569/2018-TCU (vedação a regra externa ao contrato)
+- Acórdão 1.508/2020-TCU (unidades de medida)
+- Acórdão 490/2012-TCU (prazo de vigência)`;
+
+  s+=`
+
+HIERARQUIA: em conflito entre Res. CNJ 468/2022 e IN SGD/MGI 94/2022, prevalece a Res. CNJ 468/2022. Para sanções: IN DG-CNJ 94/2023 prevalece como norma específica do CNJ.
+
+${'─'.repeat(64)}
+
+## IDENTIFICAÇÃO DA CONTRATAÇÃO
+
+Tipo de artefato: TERMO DE REFERÊNCIA
+Objeto: ${obj}
+Natureza: ${natLabel()}
+Unidade demandante: ${und}
+Modalidade: ${modalLabel()}
+Critério de julgamento: ${criterioLabel()}
+Vigência: ${vig} meses — ${vigTipoLabel()}${vigN>12?' ⚠ REQUER JUSTIFICATIVA NO TR — Acórdão 490/2012-TCU':''}
+Unidade de medida: ${umed}
+CATMAT/CATSER: ${catmat}
+Valor estimado: R$ ${valor}
+Programa de trabalho: ${prog} | ND: ${nd}
+Índice de reajuste: ${reajLabel()}
+Processo SEI (TR): ${sei}
+ETP aprovado: ${seiEtp}
+
+Equipe de gestão e fiscalização:
+- Gestor do contrato: ${gestor}
+- Fiscal técnico: ${ftec}
+- Fiscal administrativo: ${fadm}
+- Assessoria jurídica: ${jur}
+
+${'─'.repeat(64)}
+
+## DIFERENÇA FUNDAMENTAL: ETP vs. TR
+
+O ETP (Estudo Técnico Preliminar) demonstrou a necessidade e viabilidade da contratação.
+O TR é o instrumento convocatório — linguagem normativa, imperativa, objetiva.
+
+LINGUAGEM DO TR:
+✓ "deverá", "é vedado", "será exigido", "fica estabelecido"
+✗ "pode", "é recomendado", "sugere-se", "preferencialmente"
+
+O TR não justifica por que contratar (isso já foi feito no ETP). O TR define COMO, O QUÊ, QUANDO e EM QUE CONDIÇÕES.
+
+${'─'.repeat(64)}
+
+## PRINCÍPIOS OBRIGATÓRIOS DE ELABORAÇÃO
+
+1. ANCORAGEM NORMATIVA: toda cláusula deve citar o dispositivo legal exato. Nunca invente artigos, acórdãos ou normas.
+
+2. CONSISTÊNCIA COM O ETP: o TR não pode extrapolar o escopo do ETP aprovado. Objetos, quantitativos e valores devem ser consistentes.
+
+3. POSTURA CRÍTICA (para revisão): classifique achados em:
+   🔴 CRÍTICO — risco de nulidade, ilegalidade ou impugnação
+   🟠 RELEVANTE — fragilidade de efetividade ou economicidade
+   🟡 MELHORIA — aprimoramento sem risco imediato
+
+4. ENTREGA BLOCO A BLOCO: elabore uma seção por vez. Aguarde confirmação.
+
+5. NUNCA afirme que algo "está conforme" sem o dispositivo que comprova.
+
+${'─'.repeat(64)}
+
+## ESTRUTURA DO TR — MODELO CNJ 2026
+
+★ = OBRIGATÓRIO | ○ = Opcional (justificar se não incluído)
+
+${blocosSel.map(b=>`${'─'.repeat(3)} ${b.obrig?'★':'○'} SEÇÃO ${b.n}: ${b.lbl.toUpperCase()} ${'─'.repeat(3)}
+Fundamento: ${b.ref}
+
+${b.desc}`).join('\n\n')}
+
+${'─'.repeat(64)}
+
+## ANEXOS OBRIGATÓRIOS DO TR (modelo CNJ 2026)
+
+O TR deve incluir obrigatoriamente os seguintes anexos:
+
+ANEXO I — CÓDIGO DE CONDUTA PARA FORNECEDORES DO CNJ
+Base: Portaria CNJ 18/2020
+A contratada deverá assinar o Código de Conduta como condição da contratação. Incluir como obrigação expressa no item de obrigações da contratada.
+
+ANEXO XX — TERMO DE RESPONSABILIDADE E CONFIDENCIALIDADE
+Base: Portaria CNJ 159/2021 | Res. CNJ 396/2021 (ENSEC-PJ) | Lei 13.709/2018
+Assinado individualmente por cada profissional da contratada com acesso a sistemas ou dados do CNJ, antes do início dos trabalhos.
+
+ANEXO XX — MODELO DE ORDEM DE SERVIÇO / ORDEM DE FORNECIMENTO (OS/OF)
+Base: Art. 40, §1º, II, Lei 14.133/2021 | IN SGD/MGI 94/2022, art. 32
+Conteúdo mínimo da OS: número sequencial | descrição do serviço/item | volume estimado | prazo de atendimento | responsável pela emissão | responsável pelo aceite.
+
+${'─'.repeat(64)}
+
+## PAGAMENTO E SIGEO-JT
+
+O pagamento de toda nota fiscal deve observar:
+1. Registro da nota fiscal no SIGEO-JT (sistema de gestão orçamentária do CNJ) ANTES do ateste
+2. Ateste pelo fiscal técnico/administrativo após recebimento definitivo
+3. Prazo de pagamento: até 30 dias do recebimento definitivo (art. 92, §5º, Lei 14.133/2021)
+4. Vedação de antecipação sem contrapartida (art. 92, III, Lei 14.133/2021)
+
+${'─'.repeat(64)}
+
+## SANÇÕES — IN DG-CNJ 94/2023
+
+ATENÇÃO: o TR do CNJ deve referenciar EXPRESSAMENTE a IN DG-CNJ 94/2023, que é a norma específica do CNJ para aplicação de sanções administrativas em contratos. Não use apenas o art. 156 da Lei 14.133/2021.
+
+Fundamento combinado: IN DG-CNJ 94/2023 c/c arts. 155, 156 e 162, Lei 14.133/2021.
+
+Sanções aplicáveis: advertência | multa | impedimento (até 3 anos) | declaração de inidoneidade (mín. 3 anos). Podem ser cumulativas com multa (art. 156, §4º).`;
+
+  if(pendentes.length>0){
+    s+=`\n\n${'─'.repeat(64)}\n\n## ⚠ ALERTAS — ITENS PENDENTES NO TR\n`;
+    if(criticos.length){s+=`\n🔴 CRÍTICOS:\n`;s+=criticos.map(c=>`• ${c.lbl}\n  Fundamento: ${c.ref}`).join('\n')}
+    if(relevantes.length){s+=`\n\n🟠 RELEVANTES:\n`;s+=relevantes.map(c=>`• ${c.lbl}\n  Fundamento: ${c.ref}`).join('\n')}
+  }
+
+  s+=`
+
+${'─'.repeat(64)}
+
+## FORMATO DE RESPOSTA PARA ANÁLISE DE TRECHOS DO TR
+
+### Síntese executiva
+[3-5 linhas: o TR está apto para publicação no edital? 3 problemas mais graves?]
+
+### Achados por seção
+**[🔴/🟠/🟡 Título]**
+*Seção do TR*: [nº e nome específico]
+*Problema*: [descrição objetiva]
+*Fundamento*: [dispositivo exato — artigo, inciso, acórdão, item normativo]
+*Redação sugerida*: [texto substitutivo ou ação concreta]
+
+### Lacunas de informação
+[O que falta para análise completa]
+
+### Próximos passos
+[Prioridade antes da publicação do edital]
+
+${'─'.repeat(64)}
+
+## INSTRUÇÃO DE INÍCIO
+
+Aguarde instruções.
+
+Fluxo recomendado:
+1. "Aguarde instruções."
+2. Enviar o ETP aprovado → "Este é o ETP que originou este TR. Use como referência."
+3. Enviar o Modelo TR Bens e Serviços Comuns 2026 → "Memorize a estrutura exata."
+4. "Vamos iniciar pela Seção 1 — Condições Gerais."
+
+REGRAS INEGOCIÁVEIS:
+- Nunca invente artigos, acórdãos ou normas.
+- TR não pode extrapolar o escopo do ETP aprovado.
+- Linguagem imperativa: "deverá", "é vedado", "será exigido".
+- Uma seção por vez. Só avance após confirmação.
+- Sanções: sempre referenciar IN DG-CNJ 94/2023.
+- Pagamento: sempre mencionar SIGEO-JT.
+- NÃO produza nenhum conteúdo antes de receber minha próxima instrução.`;
+
+  document.getElementById('scriptBox').textContent=s;
+  const tot=ac157?CHECKS.length+CHECKS_NUVEM.length:CHECKS.length;
+  document.getElementById('stat-secoes').textContent=`${blocosSel.length} seções selecionadas`;
+  document.getElementById('stat-checks').textContent=`${tot-pendentes.length}/${tot} itens verificados`;
+}
+
+function copyScript(){
+  navigator.clipboard.writeText(document.getElementById('scriptBox').textContent).then(()=>{
+    const fb=document.getElementById('fb');fb.style.display='inline';
+    setTimeout(()=>fb.style.display='none',2500);
+  });
+}
+
+renderBlocos();
+renderChecklist();
+regen();
+document.getElementById('ac157').addEventListener('change',()=>{renderChecklist();regen()});
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Geradores de scripts para ETP e TR de contratações de STIC no CNJ, com exportação DOCX local.">
+  <title>Geradores ETP e TR — CNJ 2026</title>
+  <style>
+    :root{--navy:#0b1e3d;--navy2:#132952;--gold:#c8973a;--teal:#0a5c6e;--bg:#f4f6fa;--card:#fff;--border:#d8dde8;--text:#1a2340;--muted:#64748b}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:"Segoe UI",Arial,sans-serif;background:linear-gradient(145deg,#eef2f8 0%,var(--bg) 52%,#e8f2f4 100%);color:var(--text)}
+    header{background:var(--navy);color:#fff;padding:28px 24px}
+    .header-inner,.main{width:min(1040px,calc(100% - 32px));margin:0 auto}
+    .eyebrow{margin:0 0 8px;color:#e0b04d;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+    h1{font-size:clamp(26px,4vw,40px);line-height:1.12;margin:0 0 10px}
+    header p{max-width:760px;margin:0;color:#d9e2f0;line-height:1.6}
+    .main{padding:40px 0 56px}
+    .notice{background:#fff;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:8px;padding:14px 16px;margin-bottom:22px;line-height:1.55;color:#42516c}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:0 8px 24px rgba(11,30,61,.07);display:flex;flex-direction:column;min-height:285px}
+    .tag{display:inline-flex;align-self:flex-start;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;color:#fff}
+    .tag-etp{background:var(--gold);color:var(--navy)}
+    .tag-tr{background:var(--teal)}
+    h2{font-size:22px;margin:16px 0 8px}
+    .card p{color:var(--muted);line-height:1.6;margin:0 0 16px}
+    ul{padding-left:19px;color:#42516c;line-height:1.65;margin:0 0 24px}
+    .button{margin-top:auto;display:inline-flex;justify-content:center;text-decoration:none;padding:11px 16px;border-radius:7px;font-weight:700;color:#fff;background:var(--navy);transition:transform .15s,background .15s}
+    .button:hover{background:var(--navy2);transform:translateY(-1px)}
+    footer{text-align:center;color:var(--muted);font-size:12px;padding-top:28px}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}.main{padding-top:24px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <p class="eyebrow">DTI / CNJ · Modelo 2026</p>
+      <h1>Geradores de ETP e TR</h1>
+      <p>Ferramentas locais para configurar, revisar e exportar scripts estruturados de planejamento de contratações de STIC.</p>
+    </div>
+  </header>
+  <main class="main">
+    <div class="notice"><strong>Privacidade:</strong> os dados preenchidos e o arquivo DOCX são processados integralmente no navegador. Nenhuma informação é enviada a servidor externo.</div>
+    <section class="grid" aria-label="Geradores disponíveis">
+      <article class="card">
+        <span class="tag tag-etp">ETP</span>
+        <h2>Estudo Técnico Preliminar</h2>
+        <p>Configure o roteiro do ETP com as seções aplicáveis, checklist de conformidade, Método M²E² e pesquisa de preços.</p>
+        <ul>
+          <li>15 seções configuráveis</li>
+          <li>Checklist TCU/CNJ</li>
+          <li>Exportação do script para DOCX</li>
+        </ul>
+        <a class="button" href="etp.html">Abrir gerador de ETP</a>
+      </article>
+      <article class="card">
+        <span class="tag tag-tr">TR</span>
+        <h2>Termo de Referência</h2>
+        <p>Monte o roteiro do TR alinhado ao ETP aprovado, incluindo gestão, medição, sanções, anexos e requisitos de nuvem.</p>
+        <ul>
+          <li>20 seções configuráveis</li>
+          <li>Checklist e anexos obrigatórios</li>
+          <li>Exportação do script para DOCX</li>
+        </ul>
+        <a class="button" href="tr.html">Abrir gerador de TR</a>
+      </article>
+    </section>
+    <footer>Geradores ETP e TR CNJ 2026 · aplicação estática e sem backend</footer>
+  </main>
+</body>
+</html>

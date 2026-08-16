@@ -1,0 +1,13 @@
+{
+  "name": "geradores-etp-tr-cnj",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Geradores estáticos de scripts para ETP e TR do CNJ, com exportação DOCX local.",
+  "scripts": {
+    "test": "node --test tests/docx-export.test.cjs",
+    "test:sample": "node tests/generate-sample.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

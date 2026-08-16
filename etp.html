@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Script ETP — DTI/CNJ 2026</title>
+<style>
+:root{
+  --navy:#0B1E3D;--navy2:#132952;--navy3:#1e3a6e;
+  --gold:#C8973A;--gold2:#e0b04d;
+  --bg:#F4F6FA;--card:#FFFFFF;--card2:#F8F9FC;
+  --border:#D8DDE8;--border2:#C2C9D8;
+  --text:#1A2340;--text2:#3D4F72;--text3:#6B7A99;
+  --obr:#C0392B;--obr-bg:#FDECEA;
+  --opt:#185FA5;--opt-bg:#E8F1FB;
+  --warn:#8A5C0A;--warn-bg:#FEF5E4;
+  --ok:#1A6B3C;--ok-bg:#E6F5EE;
+  --radius:6px;--shadow:0 1px 3px rgba(11,30,61,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+
+/* HEADER */
+.header{background:var(--navy);color:#fff;padding:0 24px;display:flex;align-items:center;gap:14px;height:52px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.header-seal{width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--navy);flex-shrink:0}
+.header-title{flex:1}
+.header-title h1{font-size:14px;font-weight:600;letter-spacing:.01em}
+.header-title p{font-size:10px;opacity:.65;margin-top:1px}
+.header-badge{font-size:10px;background:rgba(200,151,58,.25);color:var(--gold2);border:0.5px solid var(--gold);padding:2px 9px;border-radius:10px}
+.header-home{font-size:11px;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.28);padding:4px 9px;border-radius:5px}
+.header-home:hover{background:rgba(255,255,255,.1)}
+
+/* LAYOUT */
+.container{display:flex;height:calc(100vh - 52px)}
+.sidebar{width:200px;min-width:200px;background:var(--navy2);display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.08)}
+.nav-section{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);padding:14px 14px 5px}
+.nav-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;border:none;background:none;color:rgba(255,255,255,.6);font-size:12px;font-weight:500;width:100%;text-align:left;border-left:3px solid transparent;transition:all .15s}
+.nav-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-btn.active{background:rgba(200,151,58,.15);color:var(--gold2);border-left-color:var(--gold)}
+.nav-btn .nb{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.nb-obr{background:var(--obr-bg);color:var(--obr)}
+.nb-opt{background:var(--opt-bg);color:var(--opt)}
+.nb-dod{background:var(--warn-bg);color:var(--warn)}
+.nb-gold{background:rgba(200,151,58,.3);color:var(--gold2)}
+.sidebar-footer{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.08)}
+.ver{font-size:10px;color:rgba(255,255,255,.3);text-align:center}
+
+/* MAIN */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.panel{display:none;flex:1;overflow-y:auto;padding:20px 24px}
+.panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.card-title{font-size:12px;font-weight:600;color:var(--navy);flex:1}
+.card-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* FORM */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g1{display:grid;grid-template-columns:1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:3px}
+label{font-size:11px;font-weight:500;color:var(--text2)}
+input[type=text],select,textarea{font-size:12px;font-family:inherit;color:var(--text);background:#fff;border:1px solid var(--border2);border-radius:var(--radius);padding:6px 9px;transition:border .15s;width:100%}
+textarea{resize:vertical;min-height:56px;line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--navy3);box-shadow:0 0 0 2px rgba(30,58,110,.1)}
+.hint{font-size:10px;color:var(--text3);margin-top:2px}
+.alert{font-size:11px;padding:7px 10px;border-radius:var(--radius);margin-top:6px;display:none}
+.alert-warn{background:var(--warn-bg);color:var(--warn);border:1px solid #f0c97a}
+.alert-ok{background:var(--ok-bg);color:var(--ok);border:1px solid #7ecfa3}
+
+/* SECTION LABELS */
+.sl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:16px 0 7px;display:flex;align-items:center;gap:6px}
+.sl:first-child{margin-top:0}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap}
+.b-obr{background:var(--obr-bg);color:var(--obr)}
+.b-opt{background:var(--opt-bg);color:var(--opt)}
+.b-dod{background:var(--warn-bg);color:var(--warn)}
+.b-ok{background:var(--ok-bg);color:var(--ok)}
+.b-gold{background:rgba(200,151,58,.15);color:var(--warn)}
+
+/* ACCORDION */
+.acc{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden}
+.acc-hdr{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--card2);cursor:pointer;user-select:none}
+.acc-hdr:hover{background:var(--card)}
+.acc-hdr input[type=checkbox]{cursor:pointer;flex-shrink:0}
+.acc-title{flex:1;font-size:12px;font-weight:500;color:var(--text)}
+.acc-body{padding:10px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--text2);line-height:1.65;display:none;white-space:pre-wrap}
+.acc-body.open{display:block}
+.acc-ref{font-size:10px;color:var(--text3);margin-top:5px;border-top:1px dashed var(--border);padding-top:5px}
+.acc-dica{font-size:10px;color:var(--opt);margin-top:4px;background:var(--opt-bg);padding:4px 7px;border-radius:4px}
+.chevron{font-size:11px;color:var(--text3);transition:transform .2s;margin-left:auto;flex-shrink:0}
+.chevron.open{transform:rotate(180deg)}
+
+/* M²E² STEPS */
+.step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px}
+.sc0{background:#FEF5E4;color:#8A5C0A}
+.sc1{background:#FDECEA;color:#C0392B}
+.sc2{background:#E6F5EE;color:#1A6B3C}
+.sc3{background:#E8F1FB;color:#185FA5}
+.sc4{background:#EEF0FD;color:#3D40B7}
+.sc5{background:#FDE8F3;color:#882D5C}
+.sc6{background:#F1EFEA;color:#5E5947}
+.sc7{background:#E4F3F8;color:#1A5F7A}
+.step-body{flex:1}
+.step-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.step-desc{font-size:11px;color:var(--text2);line-height:1.55}
+.step-io{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.io-tag{font-size:10px;padding:2px 7px;border-radius:8px}
+.io-e{background:#FDECEA;color:#C0392B}
+.io-a{background:#FEF5E4;color:#8A5C0A}
+.io-s{background:#E6F5EE;color:#1A6B3C}
+.step-feeds{font-size:10px;color:var(--text3);margin-top:4px;font-style:italic}
+
+/* PRICE PARAMS */
+.param-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.param-row:last-child{border-bottom:none}
+.param-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.pn-pri{background:var(--obr-bg);color:var(--obr)}
+.pn-sec{background:var(--opt-bg);color:var(--opt)}
+.param-body{flex:1}
+.param-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.param-desc{font-size:11px;color:var(--text2);line-height:1.55}
+
+/* SCRIPT */
+.script-area{font-family:'Courier New',monospace;font-size:11px;line-height:1.8;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;white-space:pre-wrap;word-break:break-word;min-height:200px;color:var(--text);max-height:520px;overflow-y:auto}
+.script-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.stat-pill{font-size:11px;color:var(--text3);background:var(--card2);border:1px solid var(--border);padding:3px 10px;border-radius:10px}
+
+/* BUTTONS */
+.btn{padding:7px 16px;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:#fff;color:var(--text2);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--card2);color:var(--text);border-color:var(--border2)}
+.btn-primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-primary:hover{background:var(--navy2)}
+.btn-gold{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.copy-fb{font-size:11px;color:var(--ok);display:none;margin-left:8px}
+
+/* CHECKLIST */
+.check-item{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card2);cursor:pointer;margin-bottom:5px;transition:all .15s}
+.check-item:hover{border-color:var(--border2)}
+.check-item.checked{background:var(--ok-bg);border-color:#7ecfa3}
+.ci-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.ci-r{background:var(--obr)}
+.ci-a{background:var(--gold)}
+.ci-g{background:var(--ok)}
+.ci-body{flex:1}
+.ci-lbl{font-size:12px;color:var(--text);line-height:1.45}
+.check-item.checked .ci-lbl{color:var(--ok)}
+.ci-ref{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* COUNTER */
+.ctr{font-size:11px;color:var(--text3);margin-top:6px}
+
+/* DOD BLOCK */
+.dod-block{border-left:3px solid var(--gold);padding:8px 12px;background:var(--warn-bg);border-radius:0 var(--radius) var(--radius) 0;margin-bottom:8px}
+.dod-block-title{font-size:12px;font-weight:600;color:var(--warn);margin-bottom:3px}
+.dod-block-body{font-size:11px;color:var(--text2);line-height:1.6}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .sidebar{display:none}
+  .g3{grid-template-columns:1fr 1fr}
+  .g2{grid-template-columns:1fr}
+}
+
+/* ANNEX BLOCK */
+.annex{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px}
+.annex-icon{width:28px;height:28px;border-radius:50%;background:var(--opt-bg);color:var(--opt);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.annex-body{flex:1}
+.annex-title{font-size:12px;font-weight:500;color:var(--text)}
+.annex-ref{font-size:10px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-seal">CNJ</div>
+  <div class="header-title">
+    <h1>Gerador de Script — ETP</h1>
+    <p>Estudo Técnico Preliminar · DTI/CNJ · Modelo 2026 · Lei 14.133/2021</p>
+  </div>
+  <a class="header-home" href="index.html">Início</a>
+  <div class="header-badge">v2.0 · Modelo Real CNJ 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- SIDEBAR NAV -->
+  <nav class="sidebar" aria-label="Navegação das seções">
+    <div class="nav-section">Configuração</div>
+    <button class="nav-btn active" onclick="goTab('params')"><div class="nb nb-gold">⚙</div> Parâmetros</button>
+    <button class="nav-btn" onclick="goTab('dod')"><div class="nb nb-dod">0</div> DOD (pré-ETP)</button>
+
+    <div class="nav-section">Estrutura ETP</div>
+    <button class="nav-btn" onclick="goTab('blocos')"><div class="nb nb-opt">15</div> 15 Seções do ETP</button>
+    <button class="nav-btn" onclick="goTab('checklist')"><div class="nb nb-obr">✓</div> Checklist TCU/CNJ</button>
+
+    <div class="nav-section">Metodologia</div>
+    <button class="nav-btn" onclick="goTab('m2e2')"><div class="nb nb-gold">M²</div> Método M²E²</button>
+    <button class="nav-btn" onclick="goTab('precos')"><div class="nb nb-opt">R$</div> Pesquisa de Preços</button>
+
+    <div class="nav-section">Saída</div>
+    <button class="nav-btn" onclick="goTab('script'); regen()"><div class="nb nb-gold">▶</div> Script Gerado</button>
+
+    <div class="sidebar-footer">
+      <div class="ver">ETP · CNJ 2026 · v2.0</div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ==================== PARÂMETROS ==================== -->
+    <div class="panel active" id="panel-params">
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Identificação da contratação</div>
+            <div class="card-sub">Preencha todos os campos disponíveis — eles alimentam automaticamente o script</div>
+          </div>
+        </div>
+        <div class="sl">Objeto e processo</div>
+        <div class="g2">
+          <div class="field"><label>Objeto da contratação</label><input type="text" id="objeto" placeholder="ex.: serviços de consulta de dados CPF/CNPJ com blockchain" oninput="regen()"></div>
+          <div class="field"><label>Processo SEI</label><input type="text" id="sei" placeholder="ex.: SEI 03379/2026-CNJ" oninput="regen()"></div>
+        </div>
+        <div class="g3" style="margin-top:10px">
+          <div class="field"><label>Unidade demandante</label><input type="text" id="unidade" value="DTI/CNJ" oninput="regen()"></div>
+          <div class="field">
+            <label>Tipo de solução</label>
+            <select id="tipo" onchange="regen()">
+              <option value="stic">Solução de TIC (Res. CNJ 468/2022)</option>
+              <option value="continuado">Serviço continuado (art. 106)</option>
+              <option value="comum">Bem ou serviço comum</option>
+              <option value="consultoria">Consultoria especializada</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Vigência pretendida</label>
+            <select id="vig" onchange="vigAlert()">
+              <option value="12">12 meses</option>
+              <option value="24">24 meses</option>
+              <option value="36" selected>36 meses</option>
+              <option value="48">48 meses</option>
+              <option value="60">60 meses</option>
+            </select>
+          </div>
+        </div>
+        <div class="alert alert-warn" id="vig-alert">⚠ Vigência &gt;12 meses exige justificativa expressa no ETP — Acórdão 490/2012-TCU-Plenário. Inclua fundamentos no item 1.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Contrato/instrumento anterior (baseline)</div></div>
+        <div class="g3">
+          <div class="field"><label>Número do contrato anterior</label><input type="text" id="c_ant" placeholder="ex.: Contrato 06/2022-CNJ" oninput="regen()"></div>
+          <div class="field"><label>Data de encerramento</label><input type="text" id="c_enc" placeholder="ex.: 27/01/2027" oninput="regen()"></div>
+          <div class="field"><label>Valor total (R$)</label><input type="text" id="c_val" placeholder="ex.: 200.872,80" oninput="regen()"></div>
+        </div>
+        <div class="g2" style="margin-top:10px">
+          <div class="field"><label>% executado / saldo remanescente</label><input type="text" id="c_pct" placeholder="ex.: 87% executado" oninput="regen()"></div>
+          <div class="field"><label>Penalidades aplicadas / ocorrências</label><input type="text" id="c_pen" placeholder="ex.: Nenhuma / Advertência em MM/AA" oninput="regen()"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Estimativa de valor e dotação orçamentária</div></div>
+        <div class="g3">
+          <div class="field"><label>Valor estimado total (R$)</label><input type="text" id="valor" placeholder="ex.: 200.872,80" oninput="regen()"></div>
+          <div class="field"><label>Programa de trabalho</label><input type="text" id="prog" placeholder="ex.: 02.032.0033.21BH.0001" oninput="regen()"></div>
+          <div class="field"><label>Natureza da despesa</label><input type="text" id="nd" placeholder="ex.: 3.3.90.40.00" oninput="regen()"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Equipe de planejamento da contratação</div></div>
+        <div class="hint" style="margin-bottom:10px">Obs.: os papéis não podem ser acumulados pelo mesmo servidor, exceto Demandante+Técnico em casos excepcionais com justificativa aprovada.</div>
+        <div class="g2">
+          <div class="field"><label>Integrante demandante</label><input type="text" id="id_dem" placeholder="Nome — Matrícula — e-mail" oninput="regen()"></div>
+          <div class="field"><label>Integrante técnico</label><input type="text" id="id_tec" placeholder="Nome — Matrícula — e-mail" oninput="regen()"></div>
+        </div>
+        <div class="g2" style="margin-top:10px">
+          <div class="field"><label>Integrante administrativo</label><input type="text" id="id_adm" placeholder="Nome — Matrícula — e-mail" oninput="regen()"></div>
+          <div class="field"><label>Autoridade superior (aprovação DOD)</label><input type="text" id="autoridade" placeholder="ex.: Diretor do DTI" oninput="regen()"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Configurações normativas do script</div></div>
+        <div class="g2">
+          <div class="field">
+            <label>Norma primária do CNJ</label>
+            <select id="norma" onchange="regen()">
+              <option value="res468">Res. CNJ 468/2022 + Guia STIC</option>
+              <option value="port468">Portaria CNJ 468/2025</option>
+              <option value="ambas">Ambas (Res. 468/2022 + Port. 468/2025)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Alinhamento estratégico</label>
+            <select id="estrat" onchange="regen()">
+              <option value="entic">ENTIC-JUD 2021-2026 (Res. CNJ 370/2021)</option>
+              <option value="pdtic">PDTIC do CNJ</option>
+              <option value="ambos">ENTIC-JUD + PDTIC</option>
+              <option value="outro">Outro (descrever no ETP)</option>
+            </select>
+          </div>
+        </div>
+        <div class="g2" style="margin-top:10px">
+          <div class="field">
+            <label>Incluir checklist Acórdão 157/2024-TCU (nuvem)?</label>
+            <select id="ac157" onchange="regen()">
+              <option value="sim">Sim — objeto de nuvem/IaaS/PaaS/SaaS</option>
+              <option value="nao">Não — outro objeto de TI</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Incorporar método M²E² no script?</label>
+            <select id="m2e2_on" onchange="regen()">
+              <option value="sim">Sim — incluir as 7 etapas como instrução</option>
+              <option value="nao">Não</option>
+            </select>
+          </div>
+        </div>
+        <div class="g1" style="margin-top:10px">
+          <div class="field">
+            <label>Modalidade de licitação</label>
+            <select id="modalidade" onchange="regen()">
+              <option value="pregao">Pregão eletrônico — art. 6º, XLI, Lei 14.133/2021</option>
+              <option value="srp">Registro de Preços — SRP (art. 82)</option>
+              <option value="dispensa">Dispensa de licitação (art. 75)</option>
+              <option value="inexigibilidade">Inexigibilidade (art. 74)</option>
+              <option value="concorrencia">Concorrência (art. 6º, XXXVIII)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== DOD ==================== -->
+    <div class="panel" id="panel-dod">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">DOD — Documento de Oficialização de Demanda</div>
+            <div class="card-sub">Etapa zero obrigatória — Res. CNJ 468/2022 — deve ser aprovado pela autoridade superior ANTES do início do ETP</div>
+          </div>
+          <span class="badge b-dod">PRÉ-ETP</span>
+        </div>
+        <div class="alert alert-warn" style="display:block;margin-bottom:14px">⚠ Sem o DOD aprovado pela autoridade superior, o ETP não pode ser iniciado. Verifique o processo SEI.</div>
+
+        <div class="dod-block">
+          <div class="dod-block-title">1 — Identificação da demanda</div>
+          <div class="dod-block-body">
+1.1 Previsão para conclusão da contratação da Solução de TIC<br>
+1.2 Tipo de contratação da Solução de TIC<br>
+1.3 Justificativa da necessidade (histórico, contrato anterior, objetivo institucional)<br>
+1.4 Caracterização da demanda:<br>
+&nbsp;&nbsp;&nbsp;1.4.1 Descrição da demanda<br>
+&nbsp;&nbsp;&nbsp;1.4.2 Resultados a serem alcançados com a contratação<br>
+&nbsp;&nbsp;&nbsp;1.4.3 Alinhamento estratégico (ENTIC-JUD, PDTIC, Res. CNJ 370/2021)<br>
+&nbsp;&nbsp;&nbsp;1.4.4 Quantidade prevista<br>
+&nbsp;&nbsp;&nbsp;1.4.5 Estimativa de custo (tabela: ITEM | QTD | FATURAMENTO | UNITÁRIO | TOTAL)<br>
+&nbsp;&nbsp;&nbsp;1.4.6 Objetos interdependentes (ou "Não há")
+          </div>
+        </div>
+        <div class="dod-block">
+          <div class="dod-block-title">2 — Identificação no PSTIC</div>
+          <div class="dod-block-body">
+2.1 Identificação da demanda no Plano de Contratações de STIC do exercício<br>
+2.2 Grau de priorização: <strong>Alto / Médio / Baixo</strong> (justificar)
+          </div>
+        </div>
+        <div class="dod-block">
+          <div class="dod-block-title">3 — Fonte de recursos</div>
+          <div class="dod-block-body">Programa de trabalho, natureza da despesa, dotação orçamentária correspondente</div>
+        </div>
+        <div class="dod-block">
+          <div class="dod-block-title">4 — Áreas e integrantes da equipe de planejamento</div>
+          <div class="dod-block-body">
+4.1 Área demandante: nome do responsável, matrícula, e-mail, ramal<br>
+4.2 Integrantes da equipe de planejamento:<br>
+&nbsp;&nbsp;&nbsp;4.2.1 Integrante demandante<br>
+&nbsp;&nbsp;&nbsp;4.2.2 Integrante técnico<br>
+&nbsp;&nbsp;&nbsp;4.2.3 Integrante administrativo<br><br>
+<strong>Regra:</strong> papéis não podem ser acumulados, exceto Demandante+Técnico em casos excepcionais, mediante justificativa aprovada pela autoridade competente do órgão.
+          </div>
+        </div>
+        <div class="dod-block">
+          <div class="dod-block-title">5 — Dispositivos finais</div>
+          <div class="dod-block-body">Declaração dos integrantes de ciência prévia das atribuições antes da designação formal. Assinaturas eletrônicas via SEI.</div>
+        </div>
+        <div class="dod-block" style="border-left-color:var(--obr)">
+          <div class="dod-block-title" style="color:var(--obr)">6 — Manifestação da autoridade superior ★ OBRIGATÓRIO</div>
+          <div class="dod-block-body">
+Aprovação do prosseguimento da contratação + instituição formal da equipe de planejamento.<br>
+<strong>Sem este despacho assinado eletronicamente, o ETP não pode ser iniciado.</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 15 SEÇÕES ==================== -->
+    <div class="panel" id="panel-blocos">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">15 Seções do ETP — Modelo CNJ 2026</div>
+            <div class="card-sub">Estrutura real do Modelo ETP Bens e Serviços Comuns 2026 (CNJ)</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <span class="badge b-obr">★ obrigatório</span>
+            <span class="badge b-opt">○ opcional</span>
+          </div>
+        </div>
+        <div id="blocos-list"></div>
+        <div class="ctr" id="bctr"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-sm" onclick="tall(true)">Selecionar todos</button>
+          <button class="btn btn-sm" onclick="tall(false)">Limpar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CHECKLIST ==================== -->
+    <div class="panel" id="panel-checklist">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Checklist TCU/CNJ para ETP</div>
+            <div class="card-sub">Marque os itens já verificados. Pendentes geram alertas no script.</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--obr)"><span style="width:8px;height:8px;border-radius:50%;background:var(--obr);display:inline-block"></span>crítico</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--warn)"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block"></span>relevante</span>
+          </div>
+        </div>
+        <div id="checklist-list"></div>
+      </div>
+    </div>
+
+    <!-- ==================== M²E² ==================== -->
+    <div class="panel" id="panel-m2e2">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Método M²E² — Modelagem Avançada para ETPs</div>
+            <div class="card-sub">Não é a estrutura de seções — é o caminho de raciocínio analítico por trás de cada seção do ETP</div>
+          </div>
+          <span class="badge b-gold">7 etapas</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);background:var(--warn-bg);border:1px solid #f0c97a;border-radius:var(--radius);padding:8px 12px;margin-bottom:12px">
+          <strong>Premissa central:</strong> "O uso da modelagem proporcionará a extração da relação causa-efeito da situação-problema e a proposição da solução mais viável. Você elaborará um estudo técnico efetivo, e não apenas preencherá um formulário de ETP."
+        </div>
+        <div id="m2e2-list"></div>
+      </div>
+    </div>
+
+    <!-- ==================== PESQUISA DE PREÇOS ==================== -->
+    <div class="panel" id="panel-precos">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pesquisa de Preços — Manual CNJ/SECOM</div>
+            <div class="card-sub">Base: IN SEGES/ME 65/2021 · Art. 23, Lei 14.133/2021 · Res. CNJ 468/2022 (para STIC)</div>
+          </div>
+        </div>
+        <div class="alert alert-ok" style="display:block;margin-bottom:12px">
+          ℹ <strong>Responsabilidade no ETP:</strong> área demandante (DTI). O uso deste Manual é facultativo nesta fase. Após aprovação do ETP e TR, a SECOM assume a pesquisa oficial.
+        </div>
+
+        <div class="sl">Parâmetros legais (ordem de preferência obrigatória)</div>
+        <div id="params-precos"></div>
+
+        <div class="sl">Metodologia de cálculo do preço estimado</div>
+
+        <div class="acc">
+          <div class="acc-hdr" onclick="toggleAcc(this)">
+            <span style="font-size:14px">📊</span>
+            <span class="acc-title">Desconsideração de outliers — Desvio Padrão</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="acc-body">
+<strong>Procedimento:</strong>
+a) Listar todos os preços unitários coletados e validados
+b) Calcular a média (MÉD) entre os preços
+c) Calcular o Desvio Padrão (DP)
+d) Calcular os limites:
+   • LI = MÉD − DP → inexequíveis (EXCETO preços de órgãos públicos em execução nos últimos 12 meses)
+   • LS = MÉD + DP → excessivamente elevados
+
+Preços fora do intervalo [LI, LS] são desconsiderados, exceto preços públicos inexequíveis (que demonstram exequibilidade real).
+<div class="acc-ref">Fonte: Manual de Pesquisa de Preços CNJ/SECOM | IN SEGES/ME 65/2021</div>
+          </div>
+        </div>
+
+        <div class="acc">
+          <div class="acc-hdr" onclick="toggleAcc(this)">
+            <span style="font-size:14px">🧮</span>
+            <span class="acc-title">Método estatístico para obtenção do preço estimado</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="acc-body">
+<strong>Aplicar na seguinte ordem:</strong>
+1º) Calcular MV/MÉD (menor valor / média):
+    Se MV/MÉD ≥ 90% → usar <strong>Menor Valor</strong>
+2º) Calcular CV = DP/MÉD (coeficiente de variação):
+    Se CV ≤ 25% → usar <strong>Média</strong>
+3º) Nos demais casos → usar <strong>Mediana</strong>
+
+Mínimo: 3 preços válidos. Menos de 3 exige justificativa formal e aprovação da autoridade competente.
+Um mesmo mapa pode ter combinação de métodos para diferentes itens.
+<div class="acc-ref">Fonte: Manual de Pesquisa de Preços CNJ/SECOM, item 5.8</div>
+          </div>
+        </div>
+
+        <div class="acc">
+          <div class="acc-hdr" onclick="toggleAcc(this)">
+            <span style="font-size:14px">📅</span>
+            <span class="acc-title">Índice de atualização dos preços coletados</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="acc-body">
+<strong>Índice:</strong> IPCA — para todos os preços, independentemente do objeto.
+
+<strong>Atenção:</strong> O ICTI (Índice de Custo da Tecnologia da Informação) é publicado com 2 meses de atraso, tornando inviável seu uso na pesquisa de preços. O CNJ padronizou o IPCA para a pesquisa.
+
+<strong>Período:</strong> do mês do último reajuste do contrato/ata até o mês anterior à pesquisa de preços.
+
+<strong>Distinção importante:</strong> o índice de atualização da PESQUISA (IPCA) é diferente do índice de REAJUSTE CONTRATUAL (ICTI ou IPCA — conforme cláusula do TR).
+<div class="acc-ref">Fonte: Manual de Pesquisa de Preços CNJ/SECOM, item 5.6</div>
+          </div>
+        </div>
+
+        <div class="acc">
+          <div class="acc-hdr" onclick="toggleAcc(this)">
+            <span style="font-size:14px">📋</span>
+            <span class="acc-title">Formalização da Pesquisa de Preços (documento SECOM)</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="acc-body">
+O documento "Formalização Pesquisa de Preços" elaborado pela SECOM deve conter:
+• Descrição do objeto
+• Identificação do(s) responsável(is) pela pesquisa
+• Caracterização das fontes consultadas
+• Série de preços coletados
+• Método estatístico aplicado
+• Justificativas para desconsideração de outliers
+• Memória de cálculo e documentos de suporte
+• Justificativa da escolha dos fornecedores (se parâmetro IV)
+
+Aprovação final do Mapa Comparativo de Preços: SAD — Portaria CNJ 290/2022, art. 1º, III.
+<div class="acc-ref">Fonte: Manual de Pesquisa de Preços CNJ/SECOM, item 6</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCRIPT ==================== -->
+    <div class="panel" id="panel-script">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Script Gerado — pronto para copiar</div>
+            <div class="card-sub">Cole como primeira mensagem numa nova conversa com Claude. Em seguida: "Aguarde instruções." → envie o Modelo ETP CNJ 2026 → elabore seção a seção.</div>
+          </div>
+        </div>
+        <div class="script-toolbar">
+          <button class="btn btn-gold" onclick="copyScript()">⧉ Copiar script completo</button>
+          <button class="btn btn-primary" onclick="DocxExporter.exportGenerator('ETP')">↓ Baixar DOCX</button>
+          <button class="btn" onclick="regen()">↺ Atualizar</button>
+          <span class="copy-fb" id="fb">✓ Copiado!</span>
+          <span class="copy-fb" id="docx-fb">✓ DOCX gerado!</span>
+          <span class="stat-pill" id="stat-secoes"></span>
+          <span class="stat-pill" id="stat-checks"></span>
+        </div>
+        <div class="script-area" id="scriptBox">Preencha os parâmetros e clique em "Atualizar".</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="assets/docx-export.js"></script>
+<script>
+// ============================================================
+// DADOS
+// ============================================================
+const BLOCOS=[
+  {id:'b1',n:'1',lbl:'Descrição da Necessidade da Contratação',obrig:true,
+   ref:'Art. 18, I, Lei 14.133/2021',
+   desc:`Contextualizar a necessidade: problema identificado, motivação institucional, breve histórico e alinhamento estratégico (ENTIC-JUD/PDTIC). NÃO antecipar a solução (a solução vai no item 5). Evitar descrição superficial.
+
+Deve responder: qual é o problema? Por que a Administração precisa agir? Há urgência?`,
+   dica:'Usar M²E² etapas EP (Estudo do Problema) e AS (Análise da Situação) para estruturar este bloco.'},
+  {id:'b2',n:'2',lbl:'Plano de Contratações Anual (PCA)',obrig:false,
+   ref:'Res. CNJ 468/2022 | IN SEGES 67/2021',
+   desc:`Indicar se a contratação está prevista no PCA do exercício corrente. Informar o Processo SEI relativo ao PCA e o documento SAD que acatou a inclusão/priorização.`,dica:''},
+  {id:'b3',n:'3',lbl:'Requisitos da Contratação',obrig:false,
+   ref:'Art. 18, §1º, Lei 14.133/2021 | Res. CNJ 468/2022',
+   desc:`Requisitos técnicos, de qualidade, de compatibilidade, durabilidade e segurança. Normativos aplicáveis (ABNT, agências reguladoras).
+
+Critérios de sustentabilidade: Res. CNJ 400/2021, PLS-CNJ 2021-2026 e Código de Conduta do Fornecedor (Portaria CNJ 18/2020).`,
+   dica:'Usar M²E² etapa NO (Normatização) e RC (Requisitos de Contratação).'},
+  {id:'b4',n:'4',lbl:'Levantamento de Mercado',obrig:false,
+   ref:'Art. 18, §1º, Lei 14.133/2021',
+   desc:`ATENÇÃO: este item tem TRÊS sub-blocos distintos — não colapsá-los:
+
+(a) LEVANTAMENTO DE MERCADO: alternativas disponíveis (fazer interno, licenciar, SaaS, IaaS, contratação direta), atas SRP existentes, órgãos que adotam cada solução, realização de RFI se necessário.
+
+(b) ANÁLISE DO MODELO VIGENTE E HISTÓRICO: número e vigência do contrato anterior, valores, % executado, penalidades, lições aprendidas.
+
+(c) JUSTIFICATIVA TÉCNICA E ECONÔMICA DA SOLUÇÃO ESCOLHIDA: por que esta solução e não as demais alternativas do item (a)? Critérios objetivos de escolha.`,
+   dica:'Usar M²E² etapas PS (Prospecção de Soluções) e AV (Análise de Viabilidade). Aplicar critério: menor Risco Público + maior Interesse Público.'},
+  {id:'b5',n:'5',lbl:'Descrição da Solução',obrig:false,
+   ref:'Art. 18, Lei 14.133/2021',
+   desc:`Solução escolhida descrita em todos os aspectos: forma de prestação, manutenção, suporte, assistência técnica, garantia, local de execução/entrega, necessidade de montagem/configuração. Previsão de transferência de conhecimentos, se houver.`,dica:''},
+  {id:'b6',n:'6',lbl:'Estimativa do Quantitativo',obrig:true,
+   ref:'Art. 18, §1º, Lei 14.133/2021 | NT-AudTI/TCU 8/2023',
+   desc:`Quantidades justificadas por série histórica de consumo ou fato concreto. Tabela: ITEM | DESCRIÇÃO | QUANTIDADE | UNIDADE DE MEDIDA.
+
+Memória de cálculo com 5 elementos obrigatórios (NT-AudTI/TCU 8/2023):
+(i) Premissas adotadas
+(ii) Parâmetros de entrada e fontes de dados
+(iii) Fórmulas de cálculo
+(iv) Execução dos cálculos
+(v) Identificação dos responsáveis pelo cálculo`,dica:''},
+  {id:'b7',n:'7',lbl:'Estimativa do Valor da Contratação',obrig:true,
+   ref:'Art. 23, Lei 14.133/2021 | IN SEGES/ME 65/2021 | Manual SECOM/CNJ',
+   desc:`Tabela: ITEM | DESCRIÇÃO | QTDE | UNIDADE | VALOR UNITÁRIO | VALOR TOTAL.
+
+Pesquisa de preços conforme parâmetros da IN SEGES/ME 65/2021 (ordem de preferência: sistemas oficiais → contratações similares → publicações → fornecedores → NF-e). Metodologia: desvio padrão para outliers (LI=MÉD-DP; LS=MÉD+DP). Método estatístico: menor valor (MV/MÉD≥90%), média (CV≤25%) ou mediana. Mínimo 3 preços válidos. Índice de atualização: IPCA.
+
+Valor pode ser sigiloso até a publicação do edital — art. 18, §1º, VI, Lei 14.133/2021.`,dica:''},
+  {id:'b8',n:'8',lbl:'Parcelamento da Contratação',obrig:true,
+   ref:'Art. 40, §1º; art. 47, Lei 14.133/2021',
+   desc:`Definir se o objeto será contratado em item único, por itens ou por grupos. Justificar expressamente, considerando:
+(I) Viabilidade técnica da divisão em lotes
+(II) Aproveitamento das condições do mercado local
+(III) Ampliação da competição e economia de escala
+
+Se não parcelado: justificar com base em sistema único e integrado, padronização necessária ou inviabilidade técnica da divisão.`,dica:''},
+  {id:'b9',n:'9',lbl:'Demonstrativo dos Resultados Pretendidos',obrig:false,
+   ref:'Não obrigatório — justificar se não aplicável',
+   desc:`Ganhos diretos e indiretos esperados com a contratação: economicidade, aproveitamento de recursos humanos/materiais/financeiros, melhoria de índices institucionais. Indicadores de desempenho da contratação, se houver. Servem como referência para avaliação posterior dos resultados.`,dica:''},
+  {id:'b10',n:'10',lbl:'Providências a Serem Adotadas Previamente à Celebração do Contrato',obrig:false,
+   ref:'Não obrigatório — justificar se não aplicável',
+   desc:`Todas as providências que a Administração deve adotar previamente à celebração do contrato: capacitação dos servidores designados para a fiscalização, adequação do ambiente físico ou lógico da organização, obtenção de licenças, autorizações ou certificações.`,dica:''},
+  {id:'b11',n:'11',lbl:'Contratações Correlatas e/ou Interdependentes',obrig:false,
+   ref:'Não obrigatório — justificar se não aplicável',
+   desc:`Contratações que tenham relação ou afinidade com o objeto pretendido, já realizadas ou em andamento, que possam impactar a execução ou os resultados desta contratação. Indicar processos SEI correspondentes.`,dica:''},
+  {id:'b12',n:'12',lbl:'Impacto Socioambiental',obrig:false,
+   ref:'Art. 11, V; art. 68, Lei 14.133/2021 | Res. CNJ 400/2021 | PLS-CNJ 2021-2026',
+   desc:`Tabela PLS-CNJ 2021-2026 com 9 indicadores. Para cada um: Há impacto? (Sim/Não) | Sentido (Aumento/Redução/Neutro) | Medida mitigadora:
+
+1. Consumo de papel
+2. Uso de água envasada e descartáveis plásticos
+3. Impressão de documentos
+4. Consumo de energia elétrica
+5. Consumo de água e geração de esgoto
+6. Gestão de resíduos sólidos
+7. Descarte de resíduos eletroeletrônicos
+8. Deslocamentos e uso de veículos
+9. Emissões de gases e descarbonização
+
+Se nenhum impacto relevante: usar texto padrão do modelo CNJ.`,dica:''},
+  {id:'b13',n:'13',lbl:'Riscos da Contratação',obrig:false,
+   ref:'Não obrigatório — justificar se não aplicável',
+   desc:`Matriz de risco conforme modelo CNJ. Para cada risco identificado:
+— Identificação do risco (descrição)
+— Relacionado à(ao): [processo / fornecedor / mercado / legislação / operacional]
+— Probabilidade: Baixa / Média / Alta
+— Impacto: Baixo / Médio / Alto
+— Dano principal identificado
+— Ações preventivas: ID | Ação | Responsável
+— Ações de contingência: ID | Ação | Responsável`,dica:''},
+  {id:'b14',n:'14',lbl:'Conclusão do Gestor',obrig:true,
+   ref:'Art. 18, §3º, Lei 14.133/2021',
+   desc:`Posicionamento conclusivo e fundamentado sobre:
+(a) Adequação da contratação para atender a necessidade descrita no item 1
+(b) Solução indicada (item 5) e sua justificativa (item 4c)
+(c) Análise consolidada do levantamento de mercado (item 4a e 4b)
+(d) Viabilidade (ou inviabilidade) da contratação considerando todos os aspectos levantados
+
+Declaração expressa de viabilidade ou inviabilidade — art. 18, §3º, Lei 14.133/2021.`,dica:''},
+  {id:'b15',n:'15',lbl:'Equipe de Planejamento da Contratação',obrig:true,
+   ref:'Res. CNJ 468/2022 | Art. 18, Lei 14.133/2021',
+   desc:`Tabela de composição: NOME | E-MAIL | RAMAL | UNIDADE.
+Assinaturas eletrônicas dos integrantes demandante, técnico e administrativo via SEI.`,dica:''},
+];
+
+const CHECKS=[
+  {id:'c1',lbl:'Item 1 descreve o problema sem antecipar a solução',ref:'Art. 18, I, Lei 14.133/2021',sev:'r'},
+  {id:'c2',lbl:'Memória de cálculo dos quantitativos com os 5 elementos NT-AudTI/TCU 8/2023',ref:'NT-AudTI/TCU 8/2023 | Art. 18, §1º',sev:'r'},
+  {id:'c3',lbl:'Pesquisa de preços com mínimo 3 preços válidos e hierarquia IN 65/2021 respeitada',ref:'Art. 23, Lei 14.133/2021 | IN SEGES/ME 65/2021',sev:'r'},
+  {id:'c4',lbl:'Parâmetros prioritários (I e II) usados ou impossibilidade justificada formalmente',ref:'Art. 5º, §1º, IN SEGES/ME 65/2021',sev:'r'},
+  {id:'c5',lbl:'Desvio padrão aplicado para desconsiderar outliers na série de preços',ref:'Manual SECOM/CNJ, item 5.5',sev:'a'},
+  {id:'c6',lbl:'IPCA aplicado como índice de atualização dos preços pesquisados',ref:'Manual SECOM/CNJ, item 5.6',sev:'a'},
+  {id:'c7',lbl:'Item 4 contém os 3 sub-blocos: levantamento, análise do vigente, justificativa da escolha',ref:'Art. 18, §1º, Lei 14.133/2021',sev:'r'},
+  {id:'c8',lbl:'Vigência superior a 12 meses com justificativa expressa',ref:'Acórdão 490/2012-TCU-Plenário',sev:'r'},
+  {id:'c9',lbl:'Alinhamento ao PCA do exercício declarado no item 2',ref:'Res. CNJ 468/2022 | IN SEGES 67/2021',sev:'a'},
+  {id:'c10',lbl:'Alinhamento estratégico ao ENTIC-JUD e/ou PDTIC do CNJ declarado',ref:'Res. CNJ 370/2021',sev:'a'},
+  {id:'c11',lbl:'Tabela PLS-CNJ com 9 indicadores preenchida no item 12',ref:'Res. CNJ 400/2021 | PLS-CNJ 2021-2026',sev:'a'},
+  {id:'c12',lbl:'Declaração de viabilidade na conclusão do gestor (item 14)',ref:'Art. 18, §3º, Lei 14.133/2021',sev:'r'},
+  {id:'c13',lbl:'DOD aprovado pela autoridade superior antes do início do ETP',ref:'Res. CNJ 468/2022',sev:'r'},
+  {id:'c14',lbl:'Equipe de planejamento com 3 integrantes distintos (ou justificativa de acumulação)',ref:'Res. CNJ 468/2022',sev:'r'},
+  {id:'c15',lbl:'Impacto orçamentário-financeiro (exercício + 2 subsequentes) — art. 16 LC 101/2000',ref:'Art. 16, LC 101/2000',sev:'r'},
+];
+
+const CHECKS_NUVEM=[
+  {id:'cn1',lbl:'R1: OS como instrumento formal de demanda com elementos mínimos',ref:'IN SGD/MGI 94/2022, art. 32 | Acórdão 157/2024-TCU, R1',sev:'r'},
+  {id:'cn2',lbl:'R1: Rastreabilidade por tags nos recursos de nuvem consumidos',ref:'Acórdão 157/2024-TCU, R1',sev:'r'},
+  {id:'cn3',lbl:'R1: Papéis definidos: gestor, fiscal técnico, fiscal administrativo, FinOps',ref:'Art. 117, Lei 14.133/2021 | R1',sev:'r'},
+  {id:'cn4',lbl:'R2: Justificativa formal para catálogo aberto/fechado/híbrido',ref:'Acórdão 157/2024-TCU, R2',sev:'r'},
+  {id:'cn5',lbl:'R2: Price list com preços máximos individualizados por provedor',ref:'Acórdão 157/2024-TCU, R2',sev:'r'},
+  {id:'cn6',lbl:'R2: Vedação a alteração unilateral de preços pela contratada',ref:'Art. 92, Lei 14.133/2021 | Acórdão 2.569/2018-TCU',sev:'r'},
+  {id:'cn7',lbl:'R3: Controles específicos para marketplace com limite por OS',ref:'Acórdão 157/2024-TCU, R3',sev:'a'},
+  {id:'cn8',lbl:'R4: Compatibilidade com histórico de gastos do contrato anterior',ref:'Acórdão 157/2024-TCU, R4',sev:'a'},
+  {id:'cn9',lbl:'R6: Unidade de medida (USIN/USN/UST) justificada com metodologia de aferição',ref:'Acórdão 1.508/2020-TCU | R6',sev:'r'},
+  {id:'cn10',lbl:'R6: Vedação a regra de precificação externa ao contrato endereçada',ref:'Acórdão 2.569/2018-TCU, item 9.1.1.1.1.1',sev:'r'},
+];
+
+const M2E2=[
+  {fase:'0',icon:'🗺',title:'Fase 0 — Mapeamento do Contexto e da Situação-Problema (SP)',sc:'sc0',
+   desc:'Identificar e abstrair os elementos externos (PPA/LOA, cotação do dólar, determinações superiores) e internos (objetivos de gestão, modernização, manutenção) que originam a demanda. Oficializar a SP via DOD.',
+   entry:'Circunstâncias iniciais (dados externos e internos)',
+   acao:'Abstração — extrair o significado e sentido das conjunturas',
+   saida:'Declaração formal da SP → DOD aprovado',
+   feeds:'Pré-requisito para todas as etapas do ETP'},
+  {fase:'1',icon:'🔍',title:'EP — Etapa 1: Estudo do Problema',sc:'sc1',
+   desc:'Análise de dados disponíveis, pesquisas, exame de fatos, evidências e tendências. Materializa a SP respondendo: Onde? Como? Quem? Quando? Quanto? Por que ocorre?',
+   entry:'Declaração da Situação-Problema (DOD aprovado)',
+   acao:'Aprofundamento — análise de dados, evidências e tendências',
+   saida:'Materialização da SP — caracterização acurada',
+   feeds:'→ Alimenta SEÇÃO 1 (Descrição da Necessidade)'},
+  {fase:'2',icon:'🔗',title:'AS — Etapa 2: Análise da Situação',sc:'sc2',
+   desc:'Mapeamento situacional: relações de causa-efeito, urgências organizacionais e tendências temporais. Avalia o grau de disseminação e impacto do problema na organização.',
+   entry:'Problema isolado e materializado (output da Etapa 1)',
+   acao:'Mapeamento situacional — identificação das relações causa-efeito',
+   saida:'Estadiamento da SP — avaliação de urgência e impacto',
+   feeds:'→ Complementa SEÇÃO 1 e informa SEÇÃO 3'},
+  {fase:'3',icon:'📡',title:'PS — Etapa 3: Prospecção de Soluções',sc:'sc3',
+   desc:'Busca por soluções conhecidas no mercado e inovações aplicáveis. Considera: fazer internamente, licenciar software, contratar SaaS/IaaS, atas SRP existentes, consórcio com outros órgãos.',
+   entry:'Estadiamento da SP (output da Etapa 2)',
+   acao:'Identificação — busca por soluções no mercado e em órgãos similares',
+   saida:'Rol de soluções — catálogo completo de cenários e alternativas',
+   feeds:'→ Alimenta SEÇÃO 4(a) — Levantamento de Mercado'},
+  {fase:'4',icon:'⚖',title:'AV — Etapa 4: Análise de Viabilidade',sc:'sc4',
+   desc:'Aplicação de métodos para filtrar as soluções visando o alvo principal: Baixo Risco Público (RP) + Alto Interesse Público (IP). Descarta alternativas com justificativa objetiva.',
+   entry:'Rol de cenários e soluções possíveis (output da Etapa 3)',
+   acao:'Avaliação de potencial — filtro por baixo RP e alto IP',
+   saida:'Solução mais viável — descrição clara e fundamentada',
+   feeds:'→ Alimenta SEÇÃO 4(c) — Justificativa técnica/econômica e SEÇÃO 5'},
+  {fase:'5',icon:'📜',title:'NO — Etapa 5: Normatização',sc:'sc5',
+   desc:'Verificação da solução mais viável nas normas vigentes (legais e infralegais). O objeto é vendido em moeda estrangeira? Há restrição de uso militar? Há vedação normativa específica?',
+   entry:'Descrição da solução mais viável (output da Etapa 4)',
+   acao:'Enquadramento legal — verificação de normas aplicáveis',
+   saida:'Solução adequada — normativamente executável',
+   feeds:'→ Complementa SEÇÃO 3 (Requisitos) e valida SEÇÃO 5'},
+  {fase:'6',icon:'⚙',title:'RC — Etapa 6: Requisitos de Contratação',sc:'sc6',
+   desc:'Definição de todos os requisitos funcionais, técnicos, normativos e de sustentabilidade ao longo do ciclo de vida contratual — do planejamento ao encerramento.',
+   entry:'Solução normativamente adequada (output da Etapa 5)',
+   acao:'Análise do ciclo de vida — definição dos requisitos completos',
+   saida:'Anteprojeto de contratação totalmente estruturado',
+   feeds:'→ Alimenta SEÇÃO 3 (Requisitos) e SEÇÃO 8 (Parcelamento)'},
+  {fase:'7',icon:'🔺',title:'PC — Etapa 7: Projeto de Contratação',sc:'sc7',
+   desc:'Consolidação do Triângulo da Contratação: O QUÊ (necessidade real) + COMO (forma de atendimento) + SE e QUANDO (viabilidade e momento). O ETP finalizado é a saída desta etapa.',
+   entry:'Anteprojeto de contratação (output da Etapa 6)',
+   acao:'Consolidação do triângulo — equilíbrio entre necessidade, forma e viabilidade',
+   saida:'Projeto de contratação concluído = ETP final assinado',
+   feeds:'→ Alimenta SEÇÃO 14 (Conclusão do Gestor) — ETP finalizado'},
+];
+
+const PARAMS_PRECOS=[
+  {n:'I',cls:'pn-pri',pri:'PRIORITÁRIO',title:'Sistemas oficiais de governo',
+   desc:'Painel de Preços (Compras.gov.br — acesso limitado a servidores) e PNCP (Portal Nacional de Contratações Públicas — acesso público). Usar a mediana do item correspondente. Atualizar pelo IPCA.'},
+  {n:'II',cls:'pn-pri',pri:'PRIORITÁRIO',title:'Contratações similares recentes',
+   desc:'Contratos da Administração Pública em execução ou concluídos nos últimos 12 meses, inclusive SRP. Atualizar pelo IPCA. Se impossível usar I ou II: justificar formalmente nos autos (documento que comprove a tentativa).'},
+  {n:'III',cls:'pn-sec',pri:'COMPLEMENTAR',title:'Publicações e sítios especializados',
+   desc:'Mídia especializada, tabela de referência aprovada pelo Poder Executivo federal, sítios de domínio amplo. Deve estar atualizado na data da pesquisa e no intervalo de até 6 meses antes do edital. Registrar data e hora do acesso.'},
+  {n:'IV',cls:'pn-sec',pri:'ÚLTIMO CASO',title:'Pesquisa direta com fornecedores',
+   desc:'Cotação formal de pelo menos 3 fornecedores selecionados e justificados, com proposta detalhada (CNPJ, contatos, valores, descrição), obtida até 6 meses antes do edital. Exige prazo razoável e registro de não respondentes.'},
+  {n:'V',cls:'pn-sec',pri:'COMPLEMENTAR',title:'Base nacional de notas fiscais eletrônicas (NF-e)',
+   desc:'Notas fiscais emitidas nos últimos 12 meses antes do edital, conforme Caderno de Logística da Secretaria de Gestão/ME.'},
+];
+
+let bsel=new Set(BLOCOS.filter(b=>b.obrig).map(b=>b.id));
+let csel=new Set();
+
+// ============================================================
+// NAV
+// ============================================================
+function goTab(t){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.nav-btn[onclick="goTab('${t}')"]`)?.classList.add('active');
+  // script tab has different onclick
+  if(t==='script'){
+    document.querySelectorAll('.nav-btn').forEach(b=>{if(b.onclick&&b.onclick.toString().includes("'script'"))b.classList.add('active')});
+  }
+  const p=document.getElementById('panel-'+t);
+  if(p) p.classList.add('active');
+}
+
+// ============================================================
+// RENDER BLOCOS
+// ============================================================
+function renderBlocos(){
+  const el=document.getElementById('blocos-list');
+  el.innerHTML=BLOCOS.map(b=>`
+    <div class="acc">
+      <div class="acc-hdr">
+        <input type="checkbox" id="${b.id}" ${bsel.has(b.id)?'checked':''} onchange="tbloco('${b.id}',this.checked)">
+        <label for="${b.id}" class="acc-title" style="cursor:pointer">${b.n}. ${b.lbl}</label>
+        ${b.obrig?'<span class="badge b-obr">★ obrigatório</span>':'<span class="badge b-opt">○ opcional</span>'}
+        <span class="chevron" onclick="toggleAcc(this.closest('.acc').querySelector('.acc-hdr'))">▼</span>
+      </div>
+      <div class="acc-body">
+${b.desc}
+${b.dica?`<div class="acc-dica">→ M²E²: ${b.dica}</div>`:''}
+<div class="acc-ref">${b.ref}</div>
+      </div>
+    </div>`).join('');
+  updbc();
+}
+function tbloco(id,v){v?bsel.add(id):bsel.delete(id);updbc()}
+function tall(v){BLOCOS.forEach(b=>v?bsel.add(b.id):bsel.delete(b.id));renderBlocos()}
+function updbc(){document.getElementById('bctr').textContent=`${bsel.size} de ${BLOCOS.length} seções selecionadas`}
+
+// ============================================================
+// RENDER CHECKLIST
+// ============================================================
+function renderChecklist(){
+  const ac157=document.getElementById('ac157')?.value==='sim';
+  const allChecks=ac157?[...CHECKS,...CHECKS_NUVEM]:CHECKS;
+  const el=document.getElementById('checklist-list');
+  if(!el) return;
+  el.innerHTML='';
+  if(ac157){
+    const hdr=document.createElement('div');
+    hdr.className='sl';hdr.textContent='Requisitos gerais do ETP';
+    el.appendChild(hdr);
+  }
+  CHECKS.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='check-item'+(csel.has(c.id)?' checked':'');
+    div.onclick=()=>toggleCheck(c.id,div);
+    div.innerHTML=`<div class="ci-dot ci-${c.sev}"></div><input type="checkbox" ${csel.has(c.id)?'checked':''} onclick="event.stopPropagation();toggleCheck('${c.id}',this.closest('.check-item'))"><div class="ci-body"><div class="ci-lbl">${c.lbl}</div><div class="ci-ref">${c.ref}</div></div>`;
+    el.appendChild(div);
+  });
+  if(ac157){
+    const hdr2=document.createElement('div');
+    hdr2.className='sl';hdr2.textContent='Requisitos específicos de nuvem — Acórdão 157/2024-TCU';
+    el.appendChild(hdr2);
+    CHECKS_NUVEM.forEach(c=>{
+      const div=document.createElement('div');
+      div.className='check-item'+(csel.has(c.id)?' checked':'');
+      div.onclick=()=>toggleCheck(c.id,div);
+      div.innerHTML=`<div class="ci-dot ci-${c.sev}"></div><input type="checkbox" ${csel.has(c.id)?'checked':''} onclick="event.stopPropagation();toggleCheck('${c.id}',this.closest('.check-item'))"><div class="ci-body"><div class="ci-lbl">${c.lbl}</div><div class="ci-ref">${c.ref}</div></div>`;
+      el.appendChild(div);
+    });
+  }
+}
+function toggleCheck(id,el){
+  csel.has(id)?csel.delete(id):csel.add(id);
+  el.classList.toggle('checked',csel.has(id));
+  el.querySelector('input[type=checkbox]').checked=csel.has(id);
+}
+
+// ============================================================
+// RENDER M²E²
+// ============================================================
+function renderM2e2(){
+  const el=document.getElementById('m2e2-list');
+  if(!el) return;
+  el.innerHTML=M2E2.map(s=>`
+    <div class="step">
+      <div class="step-circle ${s.sc}">${s.fase}</div>
+      <div class="step-body">
+        <div class="step-title">${s.icon} ${s.title}</div>
+        <div class="step-desc">${s.desc}</div>
+        <div class="step-io">
+          <span class="io-tag io-e">Entrada: ${s.entry}</span>
+          <span class="io-tag io-a">Ação: ${s.acao}</span>
+          <span class="io-tag io-s">Saída: ${s.saida}</span>
+        </div>
+        <div class="step-feeds">${s.feeds}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// RENDER PARAMS PRECOS
+// ============================================================
+function renderParamsPrecos(){
+  const el=document.getElementById('params-precos');
+  if(!el) return;
+  el.innerHTML=PARAMS_PRECOS.map(p=>`
+    <div class="param-row">
+      <div class="param-num ${p.cls}">${p.n}</div>
+      <div class="param-body">
+        <div class="param-title">${p.title} <span class="badge ${p.pri==='PRIORITÁRIO'?'b-obr':p.pri==='ÚLTIMO CASO'?'b-dod':'b-opt'}" style="margin-left:6px">${p.pri}</span></div>
+        <div class="param-desc">${p.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// ACCORDION
+// ============================================================
+function toggleAcc(hdr){
+  const body=hdr.nextElementSibling;
+  const chev=hdr.querySelector('.chevron');
+  if(body){body.classList.toggle('open');if(chev)chev.classList.toggle('open')}
+}
+
+// ============================================================
+// VIG ALERT
+// ============================================================
+function vigAlert(){
+  const v=parseInt(document.getElementById('vig')?.value||'12');
+  const a=document.getElementById('vig-alert');
+  if(a)a.style.display=v>12?'block':'none';
+  regen();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function v(id){return(document.getElementById(id)||{}).value?.trim()||''}
+function normaLabel(){
+  const n=v('norma');
+  return{res468:'Resolução CNJ 468/2022 e Guia de Contratações de STIC',port468:'Portaria CNJ 468/2025',ambas:'Resolução CNJ 468/2022, Guia de Contratações de STIC e Portaria CNJ 468/2025'}[n]||'';
+}
+function estratLabel(){
+  const e=v('estrat');
+  return{entic:'ENTIC-JUD 2021-2026 (Res. CNJ 370/2021)',pdtic:'PDTIC do CNJ',ambos:'ENTIC-JUD 2021-2026 (Res. CNJ 370/2021) e PDTIC do CNJ',outro:'estratégia institucional do CNJ (detalhar no ETP)'}[e]||'';
+}
+function modalLabel(){
+  const m=v('modalidade');
+  return{pregao:'Pregão eletrônico — art. 6º, XLI, Lei 14.133/2021',srp:'Sistema de Registro de Preços — SRP (art. 82, Lei 14.133/2021)',dispensa:'Dispensa de licitação (art. 75, Lei 14.133/2021)',inexigibilidade:'Inexigibilidade (art. 74, Lei 14.133/2021)',concorrencia:'Concorrência (art. 6º, XXXVIII, Lei 14.133/2021)'}[m]||m;
+}
+function tipoLabel(){
+  const t=v('tipo');
+  return{stic:'Solução de Tecnologia da Informação e Comunicação (STIC) — Res. CNJ 468/2022',continuado:'Serviço de natureza continuada — art. 106, Lei 14.133/2021',comum:'Bem ou serviço comum',consultoria:'Consultoria especializada em TI'}[t]||t;
+}
+
+// ============================================================
+// REGEN SCRIPT
+// ============================================================
+function regen(){
+  const obj=v('objeto')||'OBJETO A DEFINIR';
+  const sei=v('sei')||'SEI Nº A DEFINIR';
+  const und=v('unidade')||'DTI/CNJ';
+  const vig=v('vig');
+  const cAnt=v('c_ant');const cEnc=v('c_enc');const cVal=v('c_val');const cPct=v('c_pct');const cPen=v('c_pen');
+  const valor=v('valor')||'A ESTIMAR';
+  const prog=v('prog')||'A DEFINIR';
+  const nd=v('nd')||'A DEFINIR';
+  const iDem=v('id_dem')||'A DESIGNAR';
+  const iTec=v('id_tec')||'A DESIGNAR';
+  const iAdm=v('id_adm')||'A DESIGNAR';
+  const aut=v('autoridade')||'A DEFINIR';
+  const ac157=v('ac157')==='sim';
+  const usem2e2=v('m2e2_on')==='sim';
+  const vigN=parseInt(vig);
+
+  const blocosSel=BLOCOS.filter(b=>bsel.has(b.id));
+  const allChecks=ac157?[...CHECKS,...CHECKS_NUVEM]:CHECKS;
+  const pendentes=allChecks.filter(c=>!csel.has(c.id));
+  const criticos=pendentes.filter(c=>c.sev==='r');
+  const relevantes=pendentes.filter(c=>c.sev==='a');
+
+  let s=`# SCRIPT MESTRE — ETP DTI/CNJ 2026
+# Baseado no Modelo ETP Bens e Serviços Comuns 2026 (CNJ)
+# Unidade: ${und} | Objeto: ${obj.toUpperCase()}
+# Processo: ${sei}
+${'─'.repeat(64)}
+
+## PAPEL E CONTEXTO
+
+Você é consultor sênior em contratações públicas de TI do Poder Judiciário, especializado na elaboração de Estudos Técnicos Preliminares (ETP) conforme o modelo oficial CNJ 2026 para Bens e Serviços Comuns. Domina:
+
+NORMAS PRIMÁRIAS:
+- Lei 14.133/2021 — Nova Lei de Licitações e Contratos
+  (arts. 11, 18, 23, 40, 47, 68, 106, 117, 140, 156)
+- ${normaLabel()}
+- Res. CNJ 400/2021 (sustentabilidade no Poder Judiciário)
+- Portaria CNJ 18/2020 (Código de Conduta de Fornecedores)
+- Res. CNJ 396/2021 — ENSEC-PJ (segurança da informação)
+
+NORMAS SUBSIDIÁRIAS E BOAS PRÁTICAS:
+- IN SGD/MGI 94/2022 (boa prática para contratações de STIC)
+- IN SEGES/ME 65/2021 + Manual de Pesquisa de Preços CNJ/SECOM
+- NT-AudTI/TCU 8/2023 (memórias de cálculo — 5 elementos)`;
+
+  if(ac157) s+=`
+- Acórdão 157/2024-TCU-Plenário (riscos R1 a R6 — contratações de nuvem)
+- Acórdão 2.569/2018-TCU-Plenário (vedação a regra externa ao contrato)
+- Acórdão 1.508/2020-TCU-Plenário (padronização de unidades de medida)
+- Acórdão 490/2012-TCU-Plenário (prazo de vigência de serviços continuados)`;
+
+  s+=`
+
+HIERARQUIA NORMATIVA: em conflito entre Res. CNJ 468/2022 e IN SGD/MGI 94/2022, prevalece a Resolução do CNJ (norma específica do Judiciário). A IN é fonte subsidiária de boa prática.
+
+${'─'.repeat(64)}
+
+## IDENTIFICAÇÃO DA CONTRATAÇÃO
+
+Tipo: ${tipoLabel()}
+Objeto: ${obj}
+Unidade demandante: ${und}
+Vigência pretendida: ${vig} meses${vigN>12?' ⚠ REQUER JUSTIFICATIVA EXPRESSA — Acórdão 490/2012-TCU':''}
+Modalidade: ${modalLabel()}
+Valor estimado: R$ ${valor}
+Programa de trabalho: ${prog} | ND: ${nd}
+Alinhamento estratégico: ${estratLabel()}
+Processo SEI: ${sei}`;
+
+  if(cAnt){
+    s+=`\n\nBaseline — instrumento anterior:`;
+    s+=`\n- Contrato: ${cAnt}`;
+    if(cEnc) s+=` | Encerramento: ${cEnc}`;
+    if(cVal) s+=` | Valor: R$ ${cVal}`;
+    if(cPct) s+=` | Execução: ${cPct}`;
+    if(cPen) s+=` | Ocorrências: ${cPen}`;
+  }
+
+  s+=`
+
+Equipe de planejamento da contratação:
+- Integrante demandante: ${iDem}
+- Integrante técnico: ${iTec}
+- Integrante administrativo: ${iAdm}
+- Autoridade superior (aprovação DOD): ${aut}
+
+${'─'.repeat(64)}
+
+## ETAPA ZERO — VERIFICAÇÃO DO DOD
+
+ANTES DE QUALQUER ELABORAÇÃO, verificar se o Documento de Oficialização de Demanda (DOD) já foi aprovado pela autoridade superior conforme Res. CNJ 468/2022.
+
+O DOD deve conter, no mínimo:
+1. Identificação da demanda (tipo, justificativa, caracterização, estimativa de custo)
+   — Item 1.4.3: alinhamento ao ${estratLabel()}
+   — Item 1.4.5: tabela de estimativa de custo com itens individualizados
+2. Identificação no PSTIC do exercício e grau de priorização
+3. Fonte de recursos (programa de trabalho e natureza da despesa)
+4. Equipe de planejamento com 3 integrantes distintos (exceto exceção justificada)
+5. Declaração de ciência dos integrantes (item 5 do DOD)
+6. Manifestação da autoridade superior aprovando o prosseguimento (item 6 do DOD)
+
+Se o DOD não estiver aprovado: sinalize esta pendência e NÃO avance para o ETP.
+
+${'─'.repeat(64)}
+
+## PRINCÍPIOS OBRIGATÓRIOS DE ELABORAÇÃO
+
+1. ANCORAGEM NORMATIVA: toda afirmação deve citar o dispositivo legal exato (artigo, inciso, acórdão, item normativo). NUNCA invente artigos, acórdãos ou normas. Se algo não estiver nas fontes disponíveis, diga "não consta nas fontes disponíveis" e sinalize a necessidade de pesquisa externa.
+
+2. O ETP É UMA MODELAGEM, NÃO UM FORMULÁRIO: cada seção deve demonstrar a relação causa-efeito entre o problema e a solução proposta. Respostas genéricas ou superficiais não são aceitáveis.
+
+3. NÃO ANTECIPAR A SOLUÇÃO: as seções 1 a 4(a) descrevem o problema e o mercado. A solução escolhida só aparece em 4(c) e é detalhada no item 5.
+
+4. POSTURA CRÍTICA: ao revisar trechos, identifique problemas antes de validar. Classifique:
+   🔴 CRÍTICO — risco de ilegalidade, nulidade ou impugnação
+   🟠 RELEVANTE — fragilidade que compromete economicidade ou efetividade
+   🟡 MELHORIA — oportunidade de aprimoramento sem risco imediato
+
+5. ENTREGA BLOCO A BLOCO: elabore uma seção por vez. Aguarde confirmação antes de avançar.
+
+6. NUNCA afirme que algo "está conforme" sem citar o dispositivo que o comprova.
+
+${'─'.repeat(64)}`;
+
+  if(usem2e2){
+    s+=`
+
+## MÉTODO M²E² — FRAMEWORK ANALÍTICO (ATIVO)
+
+Ao elaborar cada seção, aplique o seguinte caminho de raciocínio:
+
+FASE 0 — Mapear o contexto e declarar formalmente a Situação-Problema (SP)
+→ Elementos externos (PPA/LOA, determinações) e internos (objetivos, modernização)
+→ Saída: DOD aprovado com SP declarada
+
+ETAPA 1 — EP: Estudo do Problema → alimenta SEÇÃO 1
+→ Aprofundar a SP com dados, fatos, evidências e tendências
+→ Responder: Onde? Como? Quem? Quando? Quanto? Por que ocorre?
+
+ETAPA 2 — AS: Análise da Situação → complementa SEÇÃO 1
+→ Mapear causas e efeitos, urgências organizacionais, impacto e disseminação
+
+ETAPA 3 — PS: Prospecção de Soluções → alimenta SEÇÃO 4(a)
+→ Identificar alternativas: fazer interno, licenciar, SaaS, IaaS, SRP existente, consórcio
+→ Verificar órgãos que adotam cada alternativa
+
+ETAPA 4 — AV: Análise de Viabilidade → alimenta SEÇÃO 4(c) e SEÇÃO 5
+→ Filtrar pelo critério: menor Risco Público (RP) + maior Interesse Público (IP)
+→ Descartar alternativas com justificativa técnica e econômica objetiva
+
+ETAPA 5 — NO: Normatização → complementa SEÇÃO 3
+→ Verificar enquadramento legal: vedações, restrições de uso, moeda, licenças
+
+ETAPA 6 — RC: Requisitos de Contratação → alimenta SEÇÃO 3 e SEÇÃO 8
+→ Definir requisitos funcionais, técnicos, normativos e de sustentabilidade
+
+ETAPA 7 — PC: Projeto de Contratação → SEÇÃO 14 e ETP final
+→ Triângulo da Contratação: O QUÊ + COMO + SE e QUANDO
+
+${'─'.repeat(64)}`;
+  }
+
+  s+=`
+
+## ESTRUTURA DO ETP — MODELO CNJ 2026 (15 SEÇÕES)
+
+★ = ITEM OBRIGATÓRIO (sempre presente)
+○ = Opcional (justificar expressamente se não aplicável)
+
+${blocosSel.map(b=>`${'─'.repeat(3)} ${b.obrig?'★':'○'} SEÇÃO ${b.n}: ${b.lbl.toUpperCase()} ${'─'.repeat(3)}
+Fundamento: ${b.ref}
+
+${b.desc}${usem2e2&&b.dica?`\n\n[M²E²] ${b.dica}`:''}`).join('\n\n')}
+
+${'─'.repeat(64)}
+
+## METODOLOGIA DE PESQUISA DE PREÇOS (SEÇÃO 7)
+
+Competência no ETP: área demandante (${und}). Uso do Manual SECOM é facultativo nesta fase.
+
+PARÂMETROS (ordem obrigatória — IN SEGES/ME 65/2021, art. 5º):
+I.  PRIORITÁRIO — Sistemas oficiais (Painel de Preços / PNCP)
+II. PRIORITÁRIO — Contratações similares (últimos 12 meses, atualizar pelo IPCA)
+    ↳ Se impossível usar I ou II: justificar formalmente nos autos do processo
+III. COMPLEMENTAR — Publicações especializadas (até 6 meses antes do edital)
+IV. ÚLTIMO CASO — Pesquisa direta com fornecedores (mín. 3, com CNPJ)
+V.  COMPLEMENTAR — Base nacional de NF-e (até 12 meses antes do edital)
+
+DESCONSIDERAÇÃO DE OUTLIERS (desvio padrão):
+• LI = MÉD − DP → inexequíveis (EXCETO preços públicos em execução nos últimos 12 meses)
+• LS = MÉD + DP → excessivamente elevados
+
+MÉTODO ESTATÍSTICO (aplicar em sequência):
+1º) Se MV/MÉD ≥ 90% → Menor Valor
+2º) Se CV = DP/MÉD ≤ 25% → Média
+3º) Demais casos → Mediana
+Mínimo 3 preços válidos. Menos que 3 exige justificativa e aprovação da autoridade.
+
+ÍNDICE DE ATUALIZAÇÃO: IPCA (período: último reajuste do contrato/ata → mês anterior à pesquisa)
+Nota: ICTI tem atraso de 2 meses — inviável para pesquisa de preços; reservado para cláusula de reajuste no TR.
+
+${'─'.repeat(64)}
+
+## IMPACTO SOCIOAMBIENTAL — TABELA PLS-CNJ 2021-2026 (SEÇÃO 12)
+
+Para cada indicador: Há impacto? (S/N) | Sentido (Aumento/Redução/Neutro) | Medida mitigadora:
+1. Consumo de papel
+2. Uso de água envasada e descartáveis plásticos
+3. Impressão de documentos
+4. Consumo de energia elétrica
+5. Consumo de água e geração de esgoto
+6. Gestão de resíduos sólidos
+7. Descarte de resíduos eletroeletrônicos
+8. Deslocamentos e uso de veículos
+9. Emissões de gases e descarbonização
+
+${'─'.repeat(64)}
+
+## MATRIZ DE RISCOS (SEÇÃO 13)
+
+Para cada risco, usar o formato do modelo CNJ:
+• Identificação do risco
+• Relacionado à(ao): [processo / fornecedor / mercado / legislação / operacional]
+• Probabilidade: Baixa / Média / Alta
+• Impacto: Baixo / Médio / Alto
+• Dano principal identificado
+• Ações preventivas: ID | Ação | Responsável
+• Ações de contingência: ID | Ação | Responsável`;
+
+  if(ac157){
+    s+=`\n\nRISCOS OBRIGATÓRIOS — Acórdão 157/2024-TCU-Plenário (contratação de nuvem):
+R1 — Gestão e fiscalização: OS formal, rastreabilidade por tags, fiscal técnico/administrativo, FinOps
+R2 — Catálogo: aberto/fechado/híbrido justificado, price list, vedação de alteração unilateral
+R3 — Marketplace: controles específicos, limite por OS (teto de dispensa art. 75), mini-ETP
+R4 — Orçamento: memória com 5 elementos NT-AudTI/TCU 8/2023, compatibilidade histórica
+R5 — Governança: fluxo Res. CNJ 468/2022, PDTIC, PCA, instâncias competentes
+R6 — Padronização: USIN/USN/UST justificada (Ac. 1.508/2020), vedação a regra externa (Ac. 2.569/2018)`;
+  }
+
+  if(pendentes.length>0){
+    s+=`\n\n${'─'.repeat(64)}\n\n## ⚠ ALERTAS — ITENS PENDENTES NO ETP\n\nOs seguintes itens do checklist estão SEM VERIFICAÇÃO. Priorize-os:`;
+    if(criticos.length){
+      s+=`\n\n🔴 CRÍTICOS (risco de ilegalidade ou nulidade):\n`;
+      s+=criticos.map(c=>`• ${c.lbl}\n  Fundamento: ${c.ref}`).join('\n');
+    }
+    if(relevantes.length){
+      s+=`\n\n🟠 RELEVANTES (fragilidade de efetividade):\n`;
+      s+=relevantes.map(c=>`• ${c.lbl}\n  Fundamento: ${c.ref}`).join('\n');
+    }
+  }
+
+  s+=`
+
+${'─'.repeat(64)}
+
+## FORMATO DE RESPOSTA PARA ANÁLISE DE TRECHOS
+
+### Síntese executiva
+[3-5 linhas: o trecho está adequado? 3 problemas mais graves?]
+
+### Achados
+Para cada problema:
+**[🔴/🟠/🟡 Título do achado]**
+*Seção do ETP*: [nº e nome]
+*Problema*: [descrição objetiva e específica]
+*Fundamento*: [dispositivo normativo exato — artigo, inciso, acórdão, item]
+*Recomendação*: [redação sugerida ou ação concreta]
+
+### Lacunas de informação
+[O que falta para análise completa]
+
+### Próximos passos
+[Ordem de prioridade antes da publicação do edital]
+
+${'─'.repeat(64)}
+
+## INSTRUÇÃO DE INÍCIO
+
+Aguarde instruções.
+
+Quando eu enviar o Modelo ETP Bens e Serviços Comuns 2026 do CNJ, memorize a estrutura exata, incluindo formatação, campos e instruções de preenchimento.
+
+Em seguida, quando eu indicar qual seção elaborar, proceda apenas com aquela seção, aguardando minha confirmação antes de avançar.
+
+REGRAS INEGOCIÁVEIS:
+- Nunca afirme que algo "está conforme" sem citar o dispositivo normativo que comprova.
+- Nunca invente artigos, acórdãos ou normas. Se não estiver nas fontes, diga explicitamente.
+- Uma seção por vez. Só avance após minha confirmação.
+- Em conflito normativo: Res. CNJ 468/2022 prevalece sobre IN SGD/MGI 94/2022.
+- Linguagem técnica e objetiva. Proibido: "ressalta-se", "cumpre destacar", jargão vazio.
+- NÃO produza nenhum conteúdo antes de receber minha próxima instrução.`;
+
+  document.getElementById('scriptBox').textContent=s;
+
+  const sec=blocosSel.length;
+  const pend=pendentes.length;
+  const tot=ac157?CHECKS.length+CHECKS_NUVEM.length:CHECKS.length;
+  document.getElementById('stat-secoes').textContent=`${sec} seções selecionadas`;
+  document.getElementById('stat-checks').textContent=`${tot-pend}/${tot} itens verificados`;
+}
+
+function copyScript(){
+  navigator.clipboard.writeText(document.getElementById('scriptBox').textContent).then(()=>{
+    const fb=document.getElementById('fb');fb.style.display='inline';
+    setTimeout(()=>fb.style.display='none',2500);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderBlocos();
+renderChecklist();
+renderM2e2();
+renderParamsPrecos();
+regen();
+
+document.getElementById('ac157').addEventListener('change',()=>{renderChecklist();regen()});
+</script>
+</body>
+</html>
